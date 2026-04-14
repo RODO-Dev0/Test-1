@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Zagros Runner - Sorani Hero</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0a3f1a 0%, #1a6d2c 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', 'Segoe UI', system-ui, monospace;
+            touch-action: manipulation;
+        }
+
+        .game-container {
+            background: #2b1e0f;
+            border-radius: 48px;
+            padding: 12px;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,255,0.2);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 28px;
+            box-shadow: 0 0 0 4px #f7c56e, 0 0 0 8px #d32f2f;
+            cursor: pointer;
+            background-color: #87CEEB;
+        }
+
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #221c12;
+            padding: 12px 20px;
+            margin-top: 16px;
+            border-radius: 60px;
+            color: #ffefb9;
+            text-shadow: 2px 2px 0 #6b2e00;
+            font-weight: bold;
+        }
+
+        .score-box, .high-box {
+            background: #000000aa;
+            backdrop-filter: blur(4px);
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .score-box span, .high-box span {
+            color: #ffd966;
+            font-size: 1.9rem;
+            margin-right: 6px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 18px;
+        }
+
+        button {
+            background: #f4a261;
+            border: none;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 12px 24px;
+            border-radius: 60px;
+            color: #2c1a0c;
+            font-family: monospace;
+            box-shadow: 0 5px 0 #a3411b;
+            transition: 0.07s linear;
+            touch-action: manipulation;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #a3411b;
+        }
+
+        .restart-btn {
+            background: #e76f51;
+            color: white;
+            padding: 8px 22px;
+            font-size: 1.3rem;
+        }
+
+        @media (max-width: 550px) {
+            .score-box, .high-box { font-size: 1rem; padding: 4px 12px;}
+            .score-box span, .high-box span { font-size: 1.4rem;}
+            button { padding: 8px 16px; font-size: 1.3rem;}
+        }
+
+        .message-area {
+            text-align: center;
+            margin-top: 12px;
+            background: #000000aa;
+            border-radius: 40px;
+            padding: 4px;
+            color: #ffdd99;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="500" height="600"></canvas>
+        <div class="info-panel">
+            <div class="score-box"><span>🏆</span> <span id="scoreValue">0</span></div>
+            <div class="high-box"><span>⭐</span> BEST <span id="highScoreValue">0</span></div>
+        </div>
+        <div class="controls">
+            <button id="jumpBtn">⬆️ باز بکە / JUMP</button>
+            <button id="restartBtn" class="restart-btn">🔄 دەستپێکەوە</button>
+        </div>
+        <div class="message-area" id="gameMessage">
+            🔥 کلیک لەسەر باز بکە! خاڵ کۆبکەرەوە 🔥
+        </div>
+    </div>
+    <p style="text-align:center; margin-top:14px; color:#fff6d0; font-weight:bold; font-size:13px;">🇰🇿 Zagros Defender - بۆ گەلی کورد (سۆرانی) 🇰🇿</p>
+</div>
+
+<script>
+    (function(){
+        // ---------- CANVAS ----------
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // game state
+        let gameRunning = true;
+        let score = 0;
+        let highScore = localStorage.getItem('zagrosHigh') ? parseInt(localStorage.getItem('zagrosHigh')) : 0;
+        document.getElementById('highScoreValue').innerText = highScore;
+
+        // player
+        const player = {
+            x: 70,
+            y: 440,
+            width: 45,
+            height: 50,
+            ySpeed: 0,
+            grounded: true,
+            jumpPower: -10,
+            gravity: 0.65
+        };
+
+        // obstacles
+        let obstacles = [];
+        let frameCounter = 0;
+        let spawnGap = 65;   // frames between obstacles
+        let baseSpeed = 5;
+        let currentSpeed = 5;
+
+        // visuals & theme (Kurdish colors)
+        let bgOffset = 0;
+
+        // ground Y
+        const groundY = 490;
+        
+        // helper functions
+        function updateHighScoreUI(){
+            document.getElementById('highScoreValue').innerText = highScore;
+        }
+
+        function updateScoreUI(){
+            document.getElementById('scoreValue').innerText = Math.floor(score);
+        }
+
+        function spawnObstacle(){
+            let obsType = Math.floor(Math.random() * 3);  // 0=rock, 1=log, 2=snake
+            let obsWidth = 30;
+            let obsHeight = 35;
+            if(obsType === 1) obsHeight = 28;
+            if(obsType === 2) obsHeight = 25;
+            obstacles.push({
+                x: canvas.width,
+                y: groundY - obsHeight + 5,
+                width: obsWidth,
+                height: obsHeight,
+                type: obsType
+            });
+        }
+
+        function resetGame(){
+            gameRunning = true;
+            score = 0;
+            currentSpeed = baseSpeed;
+            obstacles = [];
+            player.y = 440;
+            player.ySpeed = 0;
+            player.grounded = true;
+            frameCounter = 0;
+            updateScoreUI();
+            document.getElementById('gameMessage').innerHTML = "🎉 یاری دەست پێکرد! باز بکە بۆ خاڵ 🎉";
+            setTimeout(()=>{
+                if(gameRunning) document.getElementById('gameMessage').innerHTML = "⚡ کۆکردنەوەی ئاڵا و بازدان ⚡";
+            },1800);
+        }
+
+        function gameOver(){
+            if(!gameRunning) return;
+            gameRunning = false;
+            if(Math.floor(score) > highScore){
+                highScore = Math.floor(score);
+                localStorage.setItem('zagrosHigh', highScore);
+                updateHighScoreUI();
+                document.getElementById('gameMessage').innerHTML = "🏅 BEST NEW RECORD! 🏅 کلیک لە دەستپێکەوە بکە";
+            } else {
+                document.getElementById('gameMessage').innerHTML = "💔 کۆتایی هات! کلیک لە دەستپێکەوە بکە 💔";
+            }
+        }
+
+        // collision (AABB)
+        function collide(ax, ay, aw, ah, bx, by, bw, bh){
+            return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
+        }
+
+        function updateGame(){
+            if(!gameRunning) return;
+
+            // 1. player physics
+            player.ySpeed += player.gravity;
+            player.y += player.ySpeed;
+            if(player.y >= groundY - player.height){
+                player.y = groundY - player.height;
+                player.ySpeed = 0;
+                player.grounded = true;
+            } else {
+                player.grounded = false;
+            }
+
+            // 2. increase difficulty by speed & score
+            currentSpeed = baseSpeed + Math.floor(score / 350);
+            if(currentSpeed > 12) currentSpeed = 12;
+            
+            // 3. spawn obstacles
+            frameCounter++;
+            let dynamicSpawn = Math.max(40, spawnGap - Math.floor(score/500));
+            if(frameCounter >= dynamicSpawn){
+                frameCounter = 0;
+                spawnObstacle();
+            }
+
+            // 4. move obstacles & collision & score increment
+            for(let i=0; i<obstacles.length; i++){
+                const obs = obstacles[i];
+                obs.x -= currentSpeed;
+                
+                // collision detection
+                if(collide(player.x, player.y, player.width, player.height, obs.x, obs.y, obs.width, obs.height)){
+                    gameOver();
+                    return;
+                }
+                
+                // scoring: if obstacle passed player (x + width < player.x) and not counted
+                if(!obs.counted && obs.x + obs.width < player.x){
+                    obs.counted = true;
+                    // give points: 10 for each avoided obstacle + culture boost
+                    score += 10;
+                    updateScoreUI();
+                    // tiny speed sensation
+                }
+            }
+            
+            // remove offscreen obstacles
+            obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
+            
+            // 5. natural score increase per frame (endless runner feeling)
+            score += 0.2;
+            updateScoreUI();
+        }
+        
+        // ----------------- DRAW EVERYTHING KURDISH STYLE -----------------
+        function drawBackground(){
+            // sky gradient
+            const grad = ctx.createLinearGradient(0,0,0,300);
+            grad.addColorStop(0,"#f9d56e");
+            grad.addColorStop(1,"#f8c471");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0,0,canvas.width, groundY-8);
+            
+            // mountains (Zagros vibe)
+            ctx.fillStyle = "#6b4423";
+            ctx.beginPath();
+            ctx.moveTo(0, groundY-60);
+            ctx.lineTo(80, groundY-130);
+            ctx.lineTo(170, groundY-70);
+            ctx.lineTo(260, groundY-150);
+            ctx.lineTo(350, groundY-85);
+            ctx.lineTo(450, groundY-140);
+            ctx.lineTo(canvas.width, groundY-60);
+            ctx.lineTo(canvas.width, groundY);
+            ctx.lineTo(0, groundY);
+            ctx.fill();
+            
+            ctx.fillStyle = "#8B5A2B";
+            ctx.beginPath();
+            ctx.moveTo(0, groundY-40);
+            ctx.lineTo(120, groundY-90);
+            ctx.lineTo(220, groundY-45);
+            ctx.lineTo(320, groundY-110);
+            ctx.lineTo(430, groundY-60);
+            ctx.lineTo(canvas.width, groundY-45);
+            ctx.lineTo(canvas.width, groundY);
+            ctx.lineTo(0, groundY);
+            ctx.fill();
+            
+            // ground with grass
+            ctx.fillStyle = "#4a7023";
+            ctx.fillRect(0, groundY, canvas.width, canvas.height-groundY);
+            ctx.fillStyle = "#85bb65";
+            for(let i=0;i<12;i++){
+                ctx.fillRect(i*55, groundY-8, 25, 10);
+            }
+            // sun
+            ctx.fillStyle = "#FFD966";
+            ctx.shadowBlur=0;
+            ctx.beginPath();
+            ctx.arc(430, 65, 35, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#F4A261";
+            ctx.beginPath();
+            ctx.arc(430, 65, 28, 0, Math.PI*2);
+            ctx.fill();
+        }
+        
+        function drawPlayer(){
+            // Kurdish fighter with Keffiyeh pattern
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = "#2b5e2b";
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            // head
+            ctx.fillStyle = "#f4cda5";
+            ctx.fillRect(player.x+8, player.y-12, 28, 18);
+            // keffiyeh
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(player.x+5, player.y-18, 34, 10);
+            ctx.fillStyle = "#c93a3a";
+            ctx.fillRect(player.x+10, player.y-15, 25, 6);
+            // eyes
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(player.x+12, player.y-8, 7, 6);
+            ctx.fillRect(player.x+26, player.y-8, 7, 6);
+            ctx.fillStyle = "#2c1e0f";
+            ctx.fillRect(player.x+14, player.y-7, 3, 4);
+            ctx.fillRect(player.x+28, player.y-7, 3, 4);
+            // kurdish flag on chest
+            ctx.fillStyle = "#ED1C24";
+            ctx.fillRect(player.x+15, player.y+12, 15, 8);
+            ctx.fillStyle = "#FFFFFF";
+            ctx.fillRect(player.x+18, player.y+15, 9, 3);
+            ctx.fillStyle = "#00A651";
+            ctx.fillRect(player.x+15, player.y+17, 15, 3);
+        }
+        
+        function drawObstacles(){
+            for(let obs of obstacles){
+                if(obs.type === 0){ // rock
+                    ctx.fillStyle = "#5a4a3a";
+                    ctx.beginPath();
+                    ctx.ellipse(obs.x+15, obs.y+12, 14, 12, 0, 0, Math.PI*2);
+                    ctx.fill();
+                    ctx.fillStyle = "#3a2a1a";
+                    ctx.beginPath();
+                    ctx.ellipse(obs.x+10, obs.y+8, 5, 5, 0, 0, Math.PI*2);
+                    ctx.fill();
+                } else if(obs.type === 1){ // log
+                    ctx.fillStyle = "#8B5A2B";
+                    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                    ctx.fillStyle = "#5a3a1a";
+                    for(let i=0;i<3;i++) ctx.fillRect(obs.x+5+i*7, obs.y+5, 3, obs.height-10);
+                } else { // snake (avoid)
+                    ctx.fillStyle = "#306844";
+                    ctx.fillRect(obs.x, obs.y+10, obs.width, obs.height-10);
+                    ctx.fillStyle = "#d62828";
+                    ctx.fillRect(obs.x+5, obs.y+5, 6, 8);
+                }
+            }
+        }
+        
+        function drawCollectiblesEffect(){
+            // show flag floating for style
+            ctx.font = "bold 22px monospace";
+            ctx.fillStyle = "#FFD966";
+            ctx.shadowBlur = 0;
+            ctx.fillText("🇰🇿", 15, 45);
+            ctx.fillText("🏔️", canvas.width-45, 55);
+            ctx.font = "bold 14px monospace";
+            ctx.fillStyle = "#FFEC9F";
+            ctx.fillText("ZAGROS", canvas.width-85, 95);
+        }
+        
+        function drawUItext(){
+            if(!gameRunning){
+                ctx.font = "bold 36px monospace";
+                ctx.fillStyle = "#AA2E1E";
+                ctx.shadowBlur = 0;
+                ctx.fillText("GAME OVER", canvas.width/2-110, 170);
+                ctx.font = "18px monospace";
+                ctx.fillStyle = "#FFE484";
+                ctx.fillText("کلیک لەسەر دەستپێکەوە", canvas.width/2-120, 240);
+            }
+        }
+        
+        function render(){
+            drawBackground();
+            drawObstacles();
+            drawPlayer();
+            drawCollectiblesEffect();
+            drawUItext();
+            // score on canvas
+            ctx.font = "bold 26px 'Segoe UI'";
+            ctx.fillStyle = "#2F1B0C";
+            ctx.shadowBlur = 0;
+            ctx.fillText("⚡"+Math.floor(score), canvas.width-100, 55);
+        }
+        
+        // game loop
+        function gameLoop(){
+            updateGame();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // jump action
+        function jump(){
+            if(!gameRunning) return;
+            if(player.grounded){
+                player.ySpeed = player.jumpPower;
+                player.grounded = false;
+                // audio-like vibe via haptic? just visual feedback
+                document.getElementById('gameMessage').innerHTML = "🚀 باز! کۆکردنەوەی خاڵ 🚀";
+                setTimeout(()=>{
+                    if(gameRunning) document.getElementById('gameMessage').innerHTML = "🏃‍♂️ ڕابە بەرەو سەرکەوتن!";
+                },700);
+            }
+        }
+        
+        // event binding for touch & mouse
+        const jumpBtn = document.getElementById('jumpBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        
+        jumpBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            jump();
+        });
+        restartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetGame();
+        });
+        
+        // also tap on canvas for jump
+        canvas.addEventListener('click', (e) => {
+            e.preventDefault();
+            jump();
+        });
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            jump();
+        });
+        
+        // initial high score
+        updateHighScoreUI();
+        resetGame();
+        gameLoop();
+    })();
+</script>
+</body>
+</html>
