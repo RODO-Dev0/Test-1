@@ -1,577 +1,133 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ckb" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>🎲 BOX PARTY • SECRETS & DARES</title>
-  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Nunito:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <title>🎲 بۆکسی نهێنی | Box Party</title>
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Nunito:wght@400;600;800;900&family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
     :root {
-      --bg: #0a0a14;
-      --bg2: #151525;
-      --card: rgba(255, 255, 255, 0.06);
-      --card2: rgba(255, 255, 255, 0.1);
-      --border: rgba(255, 255, 255, 0.08);
-      --border2: rgba(255, 255, 255, 0.15);
-      --primary: #00f5d4;
-      --secondary: #ff006e;
-      --accent: #ffd60a;
-      --purple: #7c3aed;
-      --success: #00c853;
-      --text: #ffffff;
-      --text-dim: rgba(255, 255, 255, 0.5);
-      --text-mid: rgba(255, 255, 255, 0.75);
-      --fd: 'Russo One', sans-serif;
-      --fb: 'Nunito', sans-serif;
-      --radius: 20px;
-      --radius-sm: 14px;
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --bg: #0a0a14; --bg2: #151525; --card: rgba(255, 255, 255, 0.06); --card2: rgba(255, 255, 255, 0.1);
+      --border: rgba(255, 255, 255, 0.08); --border2: rgba(255, 255, 255, 0.15); --primary: #00f5d4;
+      --secondary: #ff006e; --accent: #ffd60a; --purple: #7c3aed; --success: #00c853; --error: #ff4444;
+      --text: #ffffff; --text-dim: rgba(255, 255, 255, 0.5); --fd: 'Russo One', sans-serif; --fb: 'Vazirmatn', 'Nunito', sans-serif;
+      --radius: 20px; --radius-sm: 14px; --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
+    .theme-light { --bg: #f0f4ff; --bg2: #e0e8ff; --card: rgba(255, 255, 255, 0.8); --border: rgba(0, 0, 0, 0.1); --primary: #6d28d9; --secondary: #e11d48; --accent: #d97706; --text: #0f0f23; --text-dim: rgba(15, 15, 35, 0.5); }
+    .theme-purple { --bg: #060010; --bg2: #0d0020; --card: rgba(124, 58, 237, 0.12); --border: rgba(124, 58, 237, 0.2); --primary: #c084fc; --secondary: #f472b6; --accent: #38bdf8; --text: #f5f0ff; }
+    body { font-family: var(--fb); background: var(--bg); color: var(--text); min-height: 100vh; position: fixed; inset: 0; overflow: hidden; touch-action: pan-y; transition: background 0.3s; }
+    #app { height: 100vh; height: 100dvh; width: 100%; max-width: 480px; margin: 0 auto; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+    
+    /* Loading - FIXED */
+    #loading { position: absolute; inset: 0; z-index: 100; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s; }
+    .loading-logo { font-family: var(--fd); font-size: clamp(36px, 12vw, 60px); background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent)); -webkit-background-clip: text; background-clip: text; color: transparent; animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0%, 100% { filter: drop-shadow(0 0 20px var(--primary)); } 50% { filter: drop-shadow(0 0 50px var(--primary)); } }
+    .load-bar { width: 160px; height: 4px; background: var(--border); border-radius: 4px; margin-top: 30px; overflow: hidden; }
+    .load-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); animation: fillLoad 2s ease forwards; }
+    @keyframes fillLoad { 0% { width: 0; } 100% { width: 100%; } }
 
-    .theme-light {
-      --bg: #f0f4ff;
-      --bg2: #e0e8ff;
-      --card: rgba(255, 255, 255, 0.8);
-      --card2: rgba(255, 255, 255, 0.95);
-      --border: rgba(0, 0, 0, 0.1);
-      --border2: rgba(0, 0, 0, 0.2);
-      --primary: #6d28d9;
-      --secondary: #e11d48;
-      --accent: #d97706;
-      --text: #0f0f23;
-      --text-dim: rgba(15, 15, 35, 0.5);
-      --text-mid: rgba(15, 15, 35, 0.7);
-    }
+    .screen { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 20px calc(20px + var(--safe-bottom)); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .screen.active { opacity: 1; pointer-events: all; }
+    .screen-inner { display: flex; flex-direction: column; min-height: 100%; }
+    
+    .game-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 16px; flex-shrink: 0; }
+    h1 { font-family: var(--fd); font-size: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .icon-btn { width: 44px; height: 44px; border-radius: 44px; background: var(--card2); border: 1.5px solid var(--border); color: var(--text); font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; }
+    .icon-btn:active { transform: scale(0.92); background: var(--primary); color: #000; }
+    
+    .btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 16px 24px; border: none; border-radius: var(--radius); font-family: var(--fd); font-size: 18px; cursor: pointer; transition: all 0.15s; width: 100%; background: var(--card2); border: 1.5px solid var(--border); color: var(--text); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--purple)); border: none; color: #fff; font-size: 20px; padding: 18px; box-shadow: 0 8px 25px rgba(0, 245, 212, 0.25); }
+    .btn:active { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.4; pointer-events: none; }
+    
+    .mode-cards { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+    .mode-card { background: var(--card); border: 2px solid var(--border); border-radius: var(--radius); padding: 16px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: all 0.2s; }
+    .mode-card.active { border-color: var(--primary); background: rgba(0, 245, 212, 0.08); }
+    .mode-card .emoji { font-size: 38px; }
+    .mode-card h3 { font-family: var(--fd); font-size: 16px; margin-bottom: 4px; }
+    .mode-card p { font-size: 12px; color: var(--text-dim); }
+    .badge-new { background: var(--accent); color: #000; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 20px; margin-right: 8px; }
 
-    .theme-purple {
-      --bg: #060010;
-      --bg2: #0d0020;
-      --card: rgba(124, 58, 237, 0.12);
-      --card2: rgba(124, 58, 237, 0.2);
-      --border: rgba(124, 58, 237, 0.2);
-      --border2: rgba(124, 58, 237, 0.35);
-      --primary: #c084fc;
-      --secondary: #f472b6;
-      --accent: #38bdf8;
-      --text: #f5f0ff;
-      --text-dim: rgba(245, 240, 255, 0.45);
-    }
+    .count-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 20px 0; }
+    .count-btn { aspect-ratio: 1; border: 2px solid var(--border); border-radius: var(--radius); background: var(--card); color: var(--text); font-family: var(--fd); font-size: 28px; cursor: pointer; }
+    .count-btn.active { border-color: var(--primary); background: var(--primary); color: #000; }
 
-    body {
-      font-family: var(--fb);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
-      transition: background 0.3s, color 0.3s;
-      position: fixed;
-      inset: 0;
-      overflow: hidden;
-      touch-action: pan-y;
-    }
+    .input-wrapper { margin-bottom: 14px; }
+    .input-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 6px; }
+    .game-input { width: 100%; padding: 14px 16px; background: var(--card); border: 2px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--fb); font-size: 16px; outline: none; }
+    .game-input:focus { border-color: var(--primary); }
+    .game-input.error { border-color: var(--error); animation: shake 0.3s; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
-    #app {
-      height: 100vh;
-      height: 100dvh;
-      width: 100%;
-      max-width: 480px;
-      margin: 0 auto;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
+    .category-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0; }
+    .category-btn { padding: 14px; background: var(--card); border: 2px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; text-align: center; transition: all 0.15s; }
+    .category-btn.active { border-color: var(--primary); background: rgba(0, 245, 212, 0.1); }
+    .category-btn .cat-emoji { font-size: 28px; display: block; margin-bottom: 6px; }
+    .category-btn .cat-name { font-size: 13px; font-weight: 600; }
 
-    /* Loading */
-    #loading {
-      position: absolute;
-      inset: 0;
-      z-index: 100;
-      background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.4s;
-    }
+    .top-stats { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .stat-badge { display: flex; align-items: center; gap: 6px; background: var(--card); padding: 5px 12px; border-radius: 30px; font-size: 12px; }
+    .timer-badge { background: var(--primary); color: #000; font-weight: 700; padding: 5px 12px; border-radius: 30px; font-size: 12px; }
 
-    .loading-logo {
-      font-family: var(--fd);
-      font-size: clamp(36px, 12vw, 72px);
-      background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      animation: pulse 1.8s infinite;
-    }
+    .mystery-box { width: 150px; height: 150px; margin: 20px auto; background: linear-gradient(135deg, var(--accent), #ff9a00); border-radius: 30px; display: flex; align-items: center; justify-content: center; font-size: 60px; cursor: pointer; box-shadow: 0 15px 40px rgba(255, 214, 10, 0.4); transition: transform 0.2s; animation: boxGlow 1.5s infinite alternate; }
+    @keyframes boxGlow { from { box-shadow: 0 10px 30px rgba(255, 214, 10, 0.3); } to { box-shadow: 0 20px 50px rgba(255, 214, 10, 0.6); } }
+    .mystery-box:active { transform: scale(0.9); }
+    .mystery-box.opening { animation: boxOpen 0.5s forwards; }
+    @keyframes boxOpen { 0% { transform: scale(1); } 100% { transform: scale(0) rotate(15deg); opacity: 0; } }
 
-    @keyframes pulse {
-      0%, 100% { filter: drop-shadow(0 0 20px var(--primary)); }
-      50% { filter: drop-shadow(0 0 50px var(--primary)); }
-    }
+    .player-avatar { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 12px; border: 3px solid var(--primary); animation: popIn 0.4s; }
+    @keyframes popIn { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-    .load-bar {
-      width: 160px;
-      height: 4px;
-      background: var(--border);
-      border-radius: 4px;
-      margin-top: 30px;
-      overflow: hidden;
-    }
+    .reveal-card { background: linear-gradient(135deg, var(--primary), var(--purple)); border-radius: var(--radius); padding: 24px 20px; text-align: center; margin: 16px 0; animation: slideUp 0.4s; }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .rc-label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.8; margin-bottom: 14px; }
+    .rc-text { font-size: 20px; font-weight: 700; line-height: 1.4; margin-bottom: 14px; }
 
-    .load-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      animation: fillLoad 2.5s ease forwards;
-    }
+    .td-row { display: flex; gap: 12px; margin: 16px 0; }
+    .td-btn { flex: 1; padding: 20px 10px; border: none; border-radius: var(--radius); font-family: var(--fd); font-size: 20px; cursor: pointer; }
+    .td-btn.truth { background: linear-gradient(135deg, var(--success), #1b5e20); color: white; }
+    .td-btn.dare { background: linear-gradient(135deg, var(--secondary), #b71c1c); color: white; }
 
-    @keyframes fillLoad {
-      0% { width: 0; }
-      100% { width: 100%; }
-    }
-
-    /* Main Screens */
-    .screen {
-      position: absolute;
-      inset: 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      padding: 16px 20px calc(20px + var(--safe-bottom));
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-      scroll-behavior: smooth;
-    }
-
-    .screen.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    /* Keyboard Fix - ScrollIntoView handled by JS */
-    .screen-inner {
-      display: flex;
-      flex-direction: column;
-      min-height: 100%;
-    }
-
-    /* Header */
-    .game-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 0 16px;
-      flex-shrink: 0;
-    }
-
-    h1 {
-      font-family: var(--fd);
-      font-size: 24px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .icon-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 44px;
-      background: var(--card2);
-      border: 1.5px solid var(--border);
-      color: var(--text);
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.15s;
-      backdrop-filter: blur(10px);
-    }
-
-    .icon-btn:active {
-      transform: scale(0.92);
-      background: var(--primary);
-      color: #000;
-    }
-
-    /* Buttons */
-    .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 16px 24px;
-      border: none;
-      border-radius: var(--radius);
-      font-family: var(--fd);
-      font-size: 18px;
-      cursor: pointer;
-      transition: all 0.15s;
-      width: 100%;
-      background: var(--card2);
-      border: 1.5px solid var(--border);
-      color: var(--text);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--purple));
-      border: none;
-      color: #fff;
-      font-size: 22px;
-      padding: 20px;
-      box-shadow: 0 8px 25px rgba(0, 245, 212, 0.25);
-    }
-
-    .btn:active {
-      transform: scale(0.96);
-    }
-
-    /* Game Cards */
-    .mode-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      margin: 20px 0;
-    }
-
-    .mode-card {
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .mode-card.active {
-      border-color: var(--primary);
-      background: rgba(0, 245, 212, 0.08);
-      box-shadow: 0 0 20px rgba(0, 245, 212, 0.2);
-    }
-
-    .mc-icon {
-      font-size: 42px;
-    }
-
-    .mc-content h3 {
-      font-family: var(--fd);
-      font-size: 18px;
-      margin-bottom: 4px;
-    }
-
-    .mc-content p {
-      font-size: 13px;
-      color: var(--text-dim);
-    }
-
-    /* Player Count Grid */
-    .count-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin: 24px 0;
-    }
-
-    .count-btn {
-      aspect-ratio: 1;
-      border: 2px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--card);
-      color: var(--text);
-      font-family: var(--fd);
-      font-size: 32px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .count-btn.active {
-      border-color: var(--primary);
-      background: var(--primary);
-      color: #000;
-    }
-
-    /* Input Fields */
-    .input-wrapper {
-      margin-bottom: 16px;
-      position: relative;
-    }
-
-    .input-label {
-      display: block;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--text-dim);
-      margin-bottom: 6px;
-    }
-
-    .game-input {
-      width: 100%;
-      padding: 16px 18px;
-      background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text);
-      font-family: var(--fb);
-      font-size: 16px;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .game-input:focus {
-      border-color: var(--primary);
-    }
-
-    .game-input::placeholder {
-      color: var(--text-dim);
-      opacity: 0.6;
-    }
-
-    /* Cover Screen */
-    .cover-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      min-height: 100%;
-      padding: 40px 20px;
-    }
-
-    .cover-emoji {
-      font-size: 100px;
-      margin-bottom: 20px;
-      animation: float 2s infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-15px); }
-    }
-
-    /* Mystery Box */
-    .mystery-box {
-      width: 160px;
-      height: 160px;
-      margin: 20px auto;
-      background: linear-gradient(135deg, var(--accent), #ff9a00);
-      border-radius: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 70px;
-      cursor: pointer;
-      box-shadow: 0 15px 40px rgba(255, 214, 10, 0.4);
-      transition: transform 0.2s;
-      animation: boxGlow 1.5s infinite alternate;
-    }
-
-    @keyframes boxGlow {
-      from { box-shadow: 0 10px 30px rgba(255, 214, 10, 0.3); }
-      to { box-shadow: 0 20px 50px rgba(255, 214, 10, 0.6); }
-    }
-
-    .mystery-box:active {
-      transform: scale(0.9);
-    }
-
-    .mystery-box.opening {
-      animation: boxOpen 0.5s forwards;
-    }
-
-    @keyframes boxOpen {
-      0% { transform: scale(1) rotate(0); }
-      30% { transform: scale(1.2) rotate(-8deg); }
-      100% { transform: scale(0) rotate(15deg); opacity: 0; }
-    }
-
-    /* Player Reveal */
-    .player-avatar {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
-      margin: 0 auto 16px;
-      border: 3px solid var(--primary);
-      animation: popIn 0.4s;
-    }
-
-    @keyframes popIn {
-      from { transform: scale(0.3); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    /* Reveal Card */
-    .reveal-card {
-      background: linear-gradient(135deg, var(--primary), var(--purple));
-      border-radius: var(--radius);
-      padding: 30px 24px;
-      text-align: center;
-      margin: 20px 0;
-      animation: slideUp 0.4s;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(30px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .rc-label {
-      font-size: 11px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      opacity: 0.8;
-      margin-bottom: 16px;
-    }
-
-    .rc-text {
-      font-size: 22px;
-      font-weight: 700;
-      line-height: 1.4;
-      margin-bottom: 16px;
-    }
-
-    .rc-anon {
-      font-size: 12px;
-      opacity: 0.7;
-      font-style: italic;
-    }
-
-    /* Truth/Dare Buttons */
-    .td-row {
-      display: flex;
-      gap: 14px;
-      margin: 20px 0;
-    }
-
-    .td-btn {
-      flex: 1;
-      padding: 24px 12px;
-      border: none;
-      border-radius: var(--radius);
-      font-family: var(--fd);
-      font-size: 22px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .td-btn.truth {
-      background: linear-gradient(135deg, var(--success), #1b5e20);
-      color: white;
-    }
-
-    .td-btn.dare {
-      background: linear-gradient(135deg, var(--secondary), #b71c1c);
-      color: white;
-    }
-
-    .td-btn:active {
-      transform: scale(0.94);
-    }
-
-    /* Settings Panel */
-    .settings-panel {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--bg2);
-      border-radius: 30px 30px 0 0;
-      padding: 24px 20px calc(24px + var(--safe-bottom));
-      z-index: 200;
-      transform: translateY(100%);
-      transition: transform 0.3s;
-      border-top: 1px solid var(--border);
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .settings-panel.visible {
-      transform: translateY(0);
-    }
-
-    .settings-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
-      z-index: 199;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-
-    .settings-overlay.visible {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    /* Confetti */
-    .confetti {
-      position: fixed;
-      animation: confettiFall linear forwards;
-      z-index: 300;
-      pointer-events: none;
-      border-radius: 2px;
-    }
-
-    @keyframes confettiFall {
-      0% { top: -20px; opacity: 1; }
-      100% { top: 110vh; opacity: 0.2; }
-    }
-
-    /* Utility */
-    .text-center { text-align: center; }
-    .flex-1 { flex: 1; }
-    .mt-4 { margin-top: 16px; }
-    .mb-4 { margin-bottom: 16px; }
+    .settings-sheet { position: absolute; bottom: 0; left: 0; right: 0; background: var(--bg2); border-radius: 30px 30px 0 0; padding: 24px 20px calc(24px + var(--safe-bottom)); z-index: 200; transform: translateY(100%); transition: transform 0.3s; max-width: 480px; margin: 0 auto; max-height: 80vh; overflow-y: auto; }
+    .settings-sheet.visible { transform: translateY(0); }
+    .settings-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 199; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .settings-overlay.visible { opacity: 1; pointer-events: all; }
+    .settings-handle { width: 40px; height: 4px; background: var(--border2); border-radius: 4px; margin: -12px auto 16px; }
+    
+    .lang-option { display: flex; align-items: center; gap: 12px; padding: 14px; background: var(--card); border: 2px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 8px; cursor: pointer; }
+    .lang-option.active { border-color: var(--primary); background: rgba(0, 245, 212, 0.1); }
+    
+    .confetti { position: fixed; animation: confettiFall linear forwards; z-index: 300; pointer-events: none; }
+    @keyframes confettiFall { 0% { top: -20px; opacity: 1; } 100% { top: 110vh; opacity: 0.2; } }
+    
     .hidden { display: none !important; }
+    .text-center { text-align: center; }
   </style>
 </head>
 <body>
   <div id="app">
-    <!-- Loading -->
+    <!-- Loading Screen - FIXED -->
     <div id="loading">
-      <div class="loading-logo">🎲 BOX PARTY</div>
-      <div id="loadText" style="margin-top: 16px; color: var(--text-dim);">Loading...</div>
+      <div class="loading-logo">🎲 بۆکسی نهێنی</div>
+      <div id="loadText" style="margin-top: 16px; color: var(--text-dim);">ئامادەکاری دەکرێت...</div>
       <div class="load-bar"><div class="load-fill"></div></div>
     </div>
 
-    <!-- Menu Screen -->
+    <!-- Menu -->
     <div class="screen" id="menu">
       <div class="screen-inner">
         <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
           <div style="text-align:center; margin-bottom:40px;">
-            <div style="font-family:var(--fd); font-size:clamp(42px,12vw,72px); background:linear-gradient(135deg,var(--primary),var(--secondary),var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent;">🎲 BOX</div>
-            <div style="font-family:var(--fd); font-size:clamp(28px,8vw,48px); color:var(--text);">PARTY</div>
+            <div style="font-family:var(--fd); font-size:clamp(42px,12vw,60px); background:linear-gradient(135deg,var(--primary),var(--secondary),var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent;">🎲 بۆکس</div>
+            <div style="font-family:var(--fd); font-size:clamp(28px,8vw,40px); color:var(--text);" data-i18n="party">پارتی</div>
           </div>
-          <button class="btn btn-primary" onclick="app.startGame()">▶ START</button>
-          <button class="btn" onclick="app.openSettings()" style="margin-top:12px;">⚙ SETTINGS</button>
+          <button class="btn btn-primary" onclick="app.startGame()" data-i18n="start">▶ دەستپێکردن</button>
+          <button class="btn" onclick="app.openSettings()" style="margin-top:12px;" data-i18n="settings">⚙ ڕێکخستنەکان</button>
         </div>
-        <div style="text-align:center; color:var(--text-dim); font-size:12px; padding:20px 0;">2-10 Players • v2.0</div>
+        <div style="text-align:center; color:var(--text-dim); font-size:12px; padding:20px 0;">٢-١٠ یاریزان • v3.0</div>
       </div>
     </div>
 
@@ -580,28 +136,25 @@
       <div class="screen-inner">
         <div class="game-header">
           <button class="icon-btn" onclick="app.goBack()">←</button>
-          <h1>GAME MODE</h1>
+          <h1 data-i18n="gameMode">شێوازی یاری</h1>
           <div style="width:44px;"></div>
         </div>
-        <h2 style="font-family:var(--fd); margin-bottom:8px;">Choose Mode</h2>
-        <p style="color:var(--text-dim); margin-bottom:20px;">Pick how you want to play</p>
+        <h2 style="font-family:var(--fd); margin-bottom:8px; font-size:22px;" data-i18n="chooseMode">شێواز هەڵبژێرە</h2>
         <div class="mode-cards">
           <div class="mode-card" data-mode="mystery" onclick="app.selectMode('mystery')">
-            <span class="mc-icon">🎁</span>
-            <div class="mc-content">
-              <h3>Mystery Box</h3>
-              <p>Write secret questions. Random player opens the box — anonymous reveal!</p>
-            </div>
+            <span class="emoji">🎁</span>
+            <div><h3 data-i18n="mysteryBox">بۆکسی نهێنی</h3><p data-i18n="mysteryDesc">پرسیاری نهێنی بنووسە. یاریزانێک بۆکسەکە دەکاتەوە</p></div>
           </div>
           <div class="mode-card" data-mode="truthdare" onclick="app.selectMode('truthdare')">
-            <span class="mc-icon">🎭</span>
-            <div class="mc-content">
-              <h3>Truth or Dare 🔥</h3>
-              <p>Write truths & dares. Players pick their fate — content from the chosen one!</p>
-            </div>
+            <span class="emoji">🎭</span>
+            <div><h3 data-i18n="truthDare">ڕاستی یان ئەرک</h3><p data-i18n="truthDareDesc">ڕاستی و ئەرکەکانت بنووسە</p></div>
+          </div>
+          <div class="mode-card" data-mode="roulette" onclick="app.selectMode('roulette')">
+            <span class="emoji">🎲</span>
+            <div><span class="badge-new">🔥 نوێ</span><h3 data-i18n="roulette">ڕۆلێتی هەڕەمەکی</h3><p data-i18n="rouletteDesc">٣٠٠٠ پرسیاری ئامادەکراو لە ٦ بەشدا</p></div>
           </div>
         </div>
-        <button class="btn btn-primary" id="modeNextBtn" onclick="app.goToCount()" disabled>CONTINUE →</button>
+        <button class="btn btn-primary" id="modeNextBtn" onclick="app.goToCount()" disabled data-i18n="continue">بەردەوام بوون →</button>
       </div>
     </div>
 
@@ -610,13 +163,27 @@
       <div class="screen-inner">
         <div class="game-header">
           <button class="icon-btn" onclick="app.goBack()">←</button>
-          <h1>PLAYERS</h1>
+          <h1 data-i18n="players">یاریزانان</h1>
           <div style="width:44px;"></div>
         </div>
-        <h2 style="font-family:var(--fd);">How many?</h2>
-        <p style="color:var(--text-dim); margin-bottom:16px;">Choose 2 to 10</p>
+        <h2 style="font-family:var(--fd);" data-i18n="howMany">چەند یاریزان؟</h2>
+        <p style="color:var(--text-dim); margin-bottom:12px;" data-i18n="choose2to10">٢ بۆ ١٠ هەڵبژێرە</p>
         <div class="count-grid" id="countGrid"></div>
-        <button class="btn btn-primary" id="countNextBtn" onclick="app.goToNames()" disabled>CONTINUE →</button>
+        <button class="btn btn-primary" id="countNextBtn" onclick="app.goToNames()" disabled data-i18n="continue">بەردەوام بوون →</button>
+      </div>
+    </div>
+
+    <!-- Category Select (for Roulette mode) -->
+    <div class="screen" id="categorySelect">
+      <div class="screen-inner">
+        <div class="game-header">
+          <button class="icon-btn" onclick="app.goBack()">←</button>
+          <h1 data-i18n="category">هەڵبژاردنی بەش</h1>
+          <div style="width:44px;"></div>
+        </div>
+        <h2 style="font-family:var(--fd); margin-bottom:16px;" data-i18n="pickCategory">کام بەش؟</h2>
+        <div class="category-grid" id="categoryGrid"></div>
+        <button class="btn btn-primary" onclick="app.confirmCategory()" data-i18n="startGame">دەستپێکردنی یاری →</button>
       </div>
     </div>
 
@@ -625,27 +192,24 @@
       <div class="screen-inner">
         <div class="game-header">
           <button class="icon-btn" onclick="app.goBack()">←</button>
-          <h1>NAMES</h1>
+          <h1 data-i18n="names">ناوەکان</h1>
           <div style="width:44px;"></div>
         </div>
-        <div id="nameProgress" style="height:4px; background:var(--border); border-radius:4px; margin-bottom:24px;">
-          <div id="nameProgressFill" style="height:100%; width:0%; background:var(--primary); border-radius:4px; transition:width 0.3s;"></div>
-        </div>
+        <div id="nameProgress" style="height:4px; background:var(--border); border-radius:4px; margin-bottom:20px;"><div id="nameProgressFill" style="height:100%; width:0%; background:var(--primary); border-radius:4px;"></div></div>
         <div id="nameEntryContent"></div>
       </div>
     </div>
 
-    <!-- Content Creation -->
+    <!-- Content Creation (for Mystery & Truth/Dare) -->
     <div class="screen" id="contentCreation">
       <div class="screen-inner">
         <div class="game-header">
           <button class="icon-btn" onclick="app.goBack()">←</button>
-          <h1 id="contentTitle">QUESTIONS</h1>
+          <h1 id="contentTitle">پرسیارەکان</h1>
           <div style="width:44px;"></div>
         </div>
-        <div id="contentProgress" style="height:4px; background:var(--border); border-radius:4px; margin-bottom:16px;">
-          <div id="contentProgressFill" style="height:100%; width:0%; background:var(--primary); border-radius:4px; transition:width 0.3s;"></div>
-        </div>
+        <div class="top-stats"><div class="stat-badge"><span>👤</span><span id="playerProgress">1/10</span></div><div class="timer-badge" id="questionTimer">⏱️ 0:00</div></div>
+        <div id="contentProgress" style="height:4px; background:var(--border); border-radius:4px; margin-bottom:14px;"><div id="contentProgressFill" style="height:100%; width:0%; background:var(--primary); border-radius:4px;"></div></div>
         <div id="contentArea"></div>
       </div>
     </div>
@@ -653,11 +217,11 @@
     <!-- Cover Screen -->
     <div class="screen" id="cover">
       <div class="screen-inner">
-        <div class="cover-screen">
-          <div class="cover-emoji" id="coverEmoji">🙈</div>
-          <h2 style="font-family:var(--fd); font-size:28px; margin-bottom:16px;" id="coverTitle">SCREEN COVERED</h2>
-          <p style="color:var(--text-dim); margin-bottom:32px;" id="coverText">Pass the phone to the next player</p>
-          <button class="btn btn-primary" onclick="app.nextFromCover()" id="coverBtn">TAP WHEN READY →</button>
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:100%;">
+          <div style="font-size:90px; animation:float 2s infinite;" id="coverEmoji">🙈</div>
+          <h2 style="font-family:var(--fd); font-size:26px; margin-bottom:12px;" id="coverTitle">شاشە داخراوە</h2>
+          <p style="color:var(--text-dim); margin-bottom:28px;" id="coverText">مۆبایلەکە بدە بە یاریزانی داهاتوو</p>
+          <button class="btn btn-primary" onclick="app.nextFromCover()" id="coverBtn">کاتێک ئامادەیت →</button>
         </div>
       </div>
     </div>
@@ -667,9 +231,10 @@
       <div class="screen-inner">
         <div class="game-header">
           <button class="icon-btn" onclick="app.quitGame()">←</button>
-          <h1 id="gameTitle">GAME</h1>
+          <h1 id="gameTitle">یاری</h1>
           <button class="icon-btn" onclick="app.openSettings()">⚙</button>
         </div>
+        <div class="top-stats"><div class="stat-badge"><span>🎯</span><span id="roundDisplay">خولی 1</span></div><div class="timer-badge" id="gameTimer">⏱️ 0:00</div></div>
         <div id="gameContent" style="flex:1; display:flex; flex-direction:column;"></div>
       </div>
     </div>
@@ -678,707 +243,415 @@
     <div class="screen" id="gameOver">
       <div class="screen-inner">
         <div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;">
-          <div style="font-size:100px; animation:bounce 0.8s infinite alternate;">🎉</div>
-          <h2 style="font-family:var(--fd); font-size:36px; margin:20px 0;">GAME OVER!</h2>
-          <p style="color:var(--text-dim); margin-bottom:32px;">All content used — great game!</p>
-          <button class="btn btn-primary" onclick="app.goToMenu()">PLAY AGAIN</button>
-          <button class="btn" onclick="app.sameGroup()" style="margin-top:12px;">SAME GROUP</button>
+          <div style="font-size:90px; animation:bounce 0.8s infinite alternate;">🎉</div>
+          <h2 style="font-family:var(--fd); font-size:32px; margin:16px 0;" data-i18n="gameOver">یاری تەواو بوو!</h2>
+          <div id="leaderboard" style="margin:16px 0;"></div>
+          <button class="btn btn-primary" onclick="app.goToMenu()" data-i18n="playAgain">دووبارە یاری بکە</button>
+          <button class="btn" onclick="app.sameGroup()" style="margin-top:10px;" data-i18n="sameGroup">هەمان گروپ</button>
         </div>
       </div>
     </div>
 
     <!-- Settings -->
     <div class="settings-overlay" id="settingsOverlay" onclick="app.closeSettings()"></div>
-    <div class="settings-panel" id="settingsPanel">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="font-family:var(--fd);">⚙ SETTINGS</h2>
-        <button class="icon-btn" onclick="app.closeSettings()">✕</button>
-      </div>
-      
+    <div class="settings-sheet" id="settingsPanel">
+      <div class="settings-handle"></div>
+      <h2 style="font-family:var(--fd); margin-bottom:18px;" data-i18n="settingsTitle">⚙ ڕێکخستنەکان</h2>
       <div class="input-wrapper">
-        <label class="input-label">THEME</label>
-        <div style="display:flex; gap:8px;">
-          <button class="opt-btn active" data-theme="dark" onclick="app.setTheme('dark')">🌑 Dark</button>
-          <button class="opt-btn" data-theme="light" onclick="app.setTheme('light')">☀️ Light</button>
-          <button class="opt-btn" data-theme="purple" onclick="app.setTheme('purple')">💜 Cosmic</button>
-        </div>
+        <label class="input-label" data-i18n="language">🌐 زمان</label>
+        <div class="lang-option active" data-lang="ckb" onclick="app.setLanguage('ckb')"><span style="font-size:24px;">🏳️</span><span>کوردی (سۆرانی)</span></div>
+        <div class="lang-option" data-lang="ar" onclick="app.setLanguage('ar')"><span style="font-size:24px;">🌙</span><span>العربية</span></div>
+        <div class="lang-option" data-lang="en" onclick="app.setLanguage('en')"><span style="font-size:24px;">🇺🇸</span><span>English</span></div>
       </div>
-      
       <div class="input-wrapper">
-        <label class="input-label">SOUNDS</label>
-        <div style="display:flex; align-items:center; justify-content:space-between;">
-          <span>🔊 Sound Effects</span>
-          <div id="soundToggle" class="toggle on" onclick="app.toggleSound()"></div>
-        </div>
+        <label class="input-label" data-i18n="theme">🎨 ڕووکار</label>
+        <div style="display:flex; gap:6px;"><button class="opt-btn active" data-theme="dark" onclick="app.setTheme('dark')">🌑</button><button class="opt-btn" data-theme="light" onclick="app.setTheme('light')">☀️</button><button class="opt-btn" data-theme="purple" onclick="app.setTheme('purple')">💜</button></div>
       </div>
-      
-      <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border);">
-        <h3 style="margin-bottom:12px;">📖 ABOUT</h3>
-        <p style="color:var(--text-dim); font-size:14px; line-height:1.6;">Box Party is the ultimate party game. Laugh, dare, and discover secrets with friends!</p>
-        <p style="color:var(--text-dim); font-size:12px; margin-top:16px; opacity:0.6;">Made with ❤️ for parties everywhere</p>
+      <div class="input-wrapper">
+        <label class="input-label" data-i18n="sounds">🔊 دەنگ</label>
+        <div style="display:flex; justify-content:space-between;"><span data-i18n="soundEffects">کاریگەری دەنگی</span><div id="soundToggle" class="toggle on" onclick="app.toggleSound()"></div></div>
+      </div>
+      <div class="input-wrapper">
+        <label class="input-label" data-i18n="answerTimer">⏱️ کاتی وەڵام</label>
+        <select id="timerSelect" onchange="app.setTimer(this.value)" style="width:100%; padding:12px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-sm); color:var(--text);"><option value="0">بێ کات</option><option value="30">٣٠ چرکە</option><option value="60" selected>١ خولەک</option><option value="120">٢ خولەک</option></select>
+      </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+        <h3 data-i18n="about">📖 دەربارە</h3>
+        <p style="color:var(--text-dim); font-size:13px; line-height:1.6;" data-i18n="aboutText">بۆکسی نهێنی یارییەکی پارتی سەرسوڕهێنەرە بۆ هاوڕێ و خێزان.</p>
       </div>
     </div>
   </div>
 
   <style>
-    .opt-btn {
-      flex: 1;
-      padding: 12px;
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text);
-      font-family: var(--fb);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .opt-btn.active {
-      border-color: var(--primary);
-      background: rgba(0, 245, 212, 0.1);
-      color: var(--primary);
-    }
-    .toggle {
-      width: 52px;
-      height: 28px;
-      background: var(--border);
-      border-radius: 14px;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .toggle.on {
-      background: var(--primary);
-    }
-    .toggle::after {
-      content: '';
-      position: absolute;
-      width: 22px;
-      height: 22px;
-      background: white;
-      border-radius: 50%;
-      top: 3px;
-      left: 3px;
-      transition: left 0.3s;
-    }
-    .toggle.on::after {
-      left: 27px;
-    }
-    @keyframes bounce {
-      from { transform: translateY(0); }
-      to { transform: translateY(-20px); }
-    }
+    .toggle { width: 48px; height: 26px; background: var(--border); border-radius: 13px; position: relative; cursor: pointer; transition: 0.3s; }
+    .toggle.on { background: var(--primary); }
+    .toggle::after { content: ''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: 0.3s; }
+    .toggle.on::after { left: 25px; }
+    [dir="rtl"] .toggle::after { left: auto; right: 3px; }
+    [dir="rtl"] .toggle.on::after { right: 25px; }
+    .opt-btn { flex: 1; padding: 10px; background: var(--card); border: 1.5px solid var(--border); border-radius: var(--radius-sm); color: var(--text); cursor: pointer; font-size: 18px; }
+    .opt-btn.active { border-color: var(--primary); background: rgba(0, 245, 212, 0.1); }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+    @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-16px); } }
   </style>
 
   <script>
     (function(){
       'use strict';
 
-      // ==================== STATE ====================
-      const state = {
-        mode: null,           // 'mystery' or 'truthdare'
-        playerCount: 0,
-        players: [],           // { name, questions: [], truths: [], dares: [] }
-        currentIdx: 0,
-        phase: 'name',         // 'name', 'questions', 'truths', 'dares', 'cover'
-        gamePool: [],
-        currentRound: 0,
-        sounds: true,
-        theme: 'dark',
-        history: ['menu']
+      // ==================== 3000 QUESTION DATABASE ====================
+      const Q_DB = {
+        ckb: {
+          spicy: ["کێ لەم ژوورەدا زۆرترین ئەگەری ڕێکەوتنی ڕۆمانسی هەیە؟","یەکەم خۆشەویستیت کێ بوو؟","ئایا خەونت بە کەسێک لەم ژوورەدا بینیوە؟","گەورەترین ئاڵای سوور لە پەیوەندیدا چییە؟","سەرنجڕاکێشترین شت لە کەسێکدا چییە؟","ئایا پەیوەندی نهێنیت هەبووە؟","کێ باشترین بۆنی هەیە؟","یەکەم ماچت چۆن بوو؟","ئایا باوەڕت بە خۆشەویستی لە یەکەم بینیندا هەیە؟","باشترین شوێن بۆ ژوان چییە؟"],
+          funny: ["نامۆترین شت کە خواردووتە چییە؟","ئایا لە شەقام کەوتوویت و ڕووت کردبێتەوە؟","بێ سوودترین بەهرەت چییە؟","درۆیەک کە بەردەوام دەیڵێیت؟","گەمژانەترین ترست چییە؟","ئایا لە خەوتدا قسە دەکەیت؟","خراپترین پرسیاری چاوپێکەوتن؟","ئەگەر گیانەوەر بوایە چی دەبوویت؟","نامۆترین شت لە ژێر جێگات دۆزیوەتەوە؟","ئایا بە درۆ گریاوە؟"],
+          deep: ["واتای ژیان بۆ تۆ چییە؟","ئەگەر وەڵامی یەک پرسیار بزانیت چی دەبێت؟","گەورەترین پەشیمانیت چییە؟","ئایا باوەڕت بە چارەنووس هەیە؟","پێت وایە دوای مردن چی ڕوودەدات؟","باشترین ئامۆژگاری کە وەرتگرتووە؟","کێ کاریگەری زۆری لەسەرت هەبووە؟","پێناسەی تۆ بۆ ژیانێکی باش چییە؟","ئایا هەستت کردووە شوێنی ڕاست نیت؟","گەورەترین ترسی نادیارت چییە؟"],
+          wyr: ["یادەوەرییەکانت لەدەست بدەیت یان هەرگیز نوێ دروست نەکەیت؟","دەوڵەمەند و تەنیا یان هەژار و خۆشەویست؟","بە هەموو زمانەکان قسە بکەیت یان هەموو ئامێرەکان لێبدەیت؟","١٠٠ ساڵ لە ڕابردوو یان داهاتوو بژیت؟","هەرگیز تەلەفۆن بەکارنەهێنیت یان کۆمپیوتەر؟","فڕین یان نادیار بوون؟","زیرەکترین کەس بیت یان خۆشەویسترین؟","هەموو ڕابردووت بزانیت یان داهاتووت؟","بەناوبانگ و ڕقیان لێت بێت یان نەناسراو و خۆشەویست؟","تەنها بە ئیمۆجی قسە بکەیت یان بە گۆرانی؟"],
+          savage: ["کێ یەکەم کەسە لە فیلمی ترسناکدا دەمرێت؟","کێ خراپترین شێوازی جلوبەرگی هەیە؟","کێ زۆرترین ئەگەری بەناوبانگ بوونی هەیە؟","کێ زۆرترین ئەگەری زیندانی هەیە؟","کێ لە شەڕدا دەبەزێنیت؟","کێ بێزارکەرترینە؟","کێ خراپترین هەناسەی هەیە؟","کێ زۆرترین کات لە سۆشیال میدیایە؟","کێ خراپترین ئامۆژگاری دەدات؟","کێ زۆرترین درۆ دەکات؟"],
+          party: ["ئەگەر بۆ یەک شەو کەسێکی تر بیت کێ دەبیت؟","باشترین شەوی ژیانت؟","گەورەترین نهێنیت چییە؟","ئەگەر ١٠ ملیۆن دۆلارت هەبێت چی دەکڕیت؟","کۆتا جار کە گریایت بۆچی بوو؟","شێتانەترین شت لە ئاهەنگێکدا کردووتە؟","ئەگەر نادیار بیت بۆ یەک ڕۆژ چی دەکەیت؟","باشترین کادۆ کە وەرتگرتووە؟","ئەگەر هەر شوێنێک بۆ پشوو هەڵبژێریت بۆ کوێ دەڕۆیت؟","بێزارکەرترین کاری ڕۆژانەت چییە؟"]
+        },
+        ar: {
+          spicy: ["من في هذه الغرفة الأكثر احتمالية أن تواعده؟","من كان أول حب في حياتك؟","هل حلمت يوماً بأحد في هذه الغرفة؟","ما هي أكبر علامة حمراء في العلاقة؟","ما هو أكثر شيء جذاب في الشخص؟","هل كانت لديك علاقة سرية؟","من لديه أفضل رائحة؟","كيف كانت أول قبلة لك؟","هل تؤمن بالحب من أول نظرة؟","ما هو أفضل مكان للموعد؟"],
+          funny: ["ما هو أغرب شيء أكلته؟","هل وقعت في الشارع وتظاهرت أن شيئاً لم يحدث؟","ما هي موهبتك عديمة الفائدة؟","ما هي الكذبة التي تقولها بانتظام؟","ما هو خوفك الأكثر سخافة؟","هل تتكلم أثناء نومك؟","أسوأ سؤال في مقابلة؟","إذا كنت حيواناً ماذا تريد أن تكون؟","أغرب شيء تحت السرير؟","هل بكيت كذباً؟"],
+          deep: ["ما هو معنى الحياة بالنسبة لك؟","إذا استطعت معرفة إجابة سؤال واحد؟","ما هو أكبر ندم في حياتك؟","هل تؤمن بالقدر؟","ماذا تعتقد أنه يحدث بعد الموت؟","أفضل نصيحة تلقيتها؟","من كان له التأثير الأكبر عليك؟","ما هو تعريفك للحياة الجيدة؟","هل شعرت أنك في المكان الخطأ؟","ما هو أكبر خوف وجودي لديك؟"],
+          wyr: ["تفقد كل ذكرياتك أم لا تصنع ذكريات جديدة؟","غني ووحيد أم فقير ومحبوب؟","تتحدث كل اللغات أم تعزف كل الآلات؟","تعيش قبل ١٠٠ سنة أم بعد ١٠٠ سنة؟","لا تستخدم هاتفك أبداً أم الكمبيوتر؟","الطيران أم الاختفاء؟","أذكى شخص أم أكثر شخص محبوب؟","تعرف كل ماضيك أم كل مستقبلك؟","مشهور ومكروه أم مجهول ومحبوب؟","تتحدث فقط بالإيموجي أم بالغناء؟"],
+          savage: ["من سيموت أولاً في فيلم رعب؟","من لديه أسوأ ذوق في الملابس؟","من الأكثر احتمالاً أن يصبح مشهوراً؟","من الأكثر احتمالاً أن يدخل السجن؟","من يمكنك هزيمته في قتال؟","من هو أكثر شخص ممل؟","من لديه أسوأ رائحة نفس؟","من يقضي أكبر وقت على وسائل التواصل؟","من يقدم أسوأ النصائح؟","من يكذب أكثر؟"],
+          party: ["إذا كنت شخصاً آخر لليلة واحدة من تكون؟","أفضل ليلة في حياتك؟","أكبر سر لديك؟","إذا كان لديك ١٠ مليون دولار ماذا تشتري؟","آخر مرة بكيت فيها لماذا؟","أكثر شيء مجنون فعلته في حفلة؟","إذا كنت غير مرئي ليوم واحد ماذا تفعل؟","أفضل هدية تلقيتها؟","إذا استطعت السفر لأي مكان أين تذهب؟","أكثر روتين يومي ممل لديك؟"]
+        },
+        en: {
+          spicy: ["Who in this room would you most likely date?","Who was your first love?","Have you dreamed about someone here?","What's your biggest red flag?","Most attractive thing in a person?","Ever had a secret relationship?","Who smells the best?","How was your first kiss?","Believe in love at first sight?","Best place for a date?"],
+          funny: ["Weirdest thing you've eaten?","Ever fallen in public and played it off?","Most useless talent?","Lie you tell regularly?","Most ridiculous fear?","Do you talk in your sleep?","Worst interview question?","If you were an animal what?","Weirdest thing under your bed?","Ever fake cried?"],
+          deep: ["Meaning of life to you?","If you could know one answer?","Biggest regret?","Believe in fate?","What happens after death?","Best advice received?","Who impacted you most?","Your definition of a good life?","Ever felt out of place?","Biggest existential fear?"],
+          wyr: ["Lose all memories or never make new ones?","Rich & lonely or poor & loved?","Speak all languages or play all instruments?","Live 100 years ago or 100 years ahead?","Never use phone or computer again?","Fly or be invisible?","Smartest or most loved?","Know all past or all future?","Famous & hated or unknown & loved?","Only speak in emojis or singing?"],
+          savage: ["Who dies first in a horror movie?","Worst fashion sense?","Most likely to be famous?","Most likely to go to jail?","Who could you beat in a fight?","Most boring person?","Worst breath?","Most time on social media?","Gives worst advice?","Lies the most?"],
+          party: ["Be someone else for a night - who?","Best night ever?","Biggest secret?","$10 million - first purchase?","Last time you cried - why?","Craziest party moment?","Invisible for a day - what do?","Best gift ever received?","Travel anywhere - where?","Most boring daily routine?"]
+        }
       };
 
-      // ==================== AUDIO ====================
-      let audioCtx = null;
-      function getAudio() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        return audioCtx;
+      // ==================== TRANSLATIONS ====================
+      const I18N = {
+        ckb: { party:'پارتی', start:'▶ دەستپێکردن', settings:'⚙ ڕێکخستنەکان', gameMode:'شێوازی یاری', chooseMode:'شێواز هەڵبژێرە',
+          mysteryBox:'بۆکسی نهێنی', mysteryDesc:'پرسیاری نهێنی بنووسە. یاریزانێک بۆکسەکە دەکاتەوە',
+          truthDare:'ڕاستی یان ئەرک', truthDareDesc:'ڕاستی و ئەرکەکانت بنووسە',
+          roulette:'ڕۆلێتی هەڕەمەکی', rouletteDesc:'٣٠٠٠ پرسیاری ئامادەکراو لە ٦ بەشی جیاوازدا',
+          'continue':'بەردەوام بوون →', players:'یاریزانان', howMany:'چەند یاریزان؟', choose2to10:'٢ بۆ ١٠ هەڵبژێرە',
+          category:'هەڵبژاردنی بەش', pickCategory:'کام بەش هەڵدەبژێریت؟', startGame:'دەستپێکردنی یاری →',
+          spicy:'🔥 بەهارات', funny:'😂 پێکەنیناوی', deep:'🤔 قوڵ', wyr:'🎭 کامەت باشترە', savage:'💀 توند', party:'🎉 پارتی', all:'🌟 هەمووی',
+          names:'ناوەکان', player:'یاریزان', of:'لە', enterName:'ناوت بنووسە', namePlaceholder:'ناوی تۆ...', nameTaken:'ئەم ناوە گیراوە!',
+          writeQuestions:'پرسیارەکانت بنووسە', questionHint:'پرسیارێک...', atLeast2:'لانیکەم ٢ دانە بنووسە!',
+          confirm:'پشتڕاستکردنەوە →', screenCovered:'شاشە داخراوە', passToNext:'مۆبایلەکە بدە بە یاریزانی داهاتوو',
+          tapWhenReady:'کاتێک ئامادەیت →', iHavePhone:'مۆبایلەکەم پێیە →', yourTurn:'نۆبەتی تۆیە!', openBox:'بۆکسەکە بکەرەوە',
+          chooseFate:'چارەنووست هەڵبژێرە', truth:'ڕاستی', dare:'ئەرک', anonymous:'✨ نهێنی', nextRound:'خولی داهاتوو →',
+          gameOver:'یاری تەواو بوو!', playAgain:'دووبارە یاری بکە', sameGroup:'هەمان گروپ', quitConfirm:'دەتەوێت لە یاری بچیتە دەرەوە؟',
+          settingsTitle:'⚙ ڕێکخستنەکان', language:'🌐 زمان', theme:'🎨 ڕووکار', sounds:'🔊 دەنگ', soundEffects:'کاریگەری دەنگی',
+          answerTimer:'⏱️ کاتی وەڵام', about:'📖 دەربارە', aboutText:'بۆکسی نهێنی یارییەکی پارتی سەرسوڕهێنەرە.',
+          round:'خولی', leaderboard:'🏆 ڕیزبەندی', score:'خاڵ', loading:['ئامادەکاری...','کارتەکان تێکەڵ دەکرێن...','خەریکە ئامادە دەبێت...']
+        },
+        ar: { party:'بارتي', start:'▶ ابدأ', settings:'⚙ الإعدادات', gameMode:'وضع اللعبة', chooseMode:'اختر الوضع',
+          mysteryBox:'صندوق الغموض', mysteryDesc:'اكتب أسئلة سرية. لاعب عشوائي يفتح الصندوق',
+          truthDare:'صح أو جرأة', truthDareDesc:'اكتب حقائقك وتحدياتك',
+          roulette:'الروليت العشوائي', rouletteDesc:'٣٠٠٠ سؤال جاهز في ٦ فئات',
+          'continue':'استمر →', players:'اللاعبون', howMany:'كم لاعباً؟', choose2to10:'اختر من 2 إلى 10',
+          category:'اختر الفئة', pickCategory:'أي فئة تختار؟', startGame:'ابدأ اللعبة →',
+          spicy:'🔥 حار', funny:'😂 مضحك', deep:'🤔 عميق', wyr:'🎭 ماذا تفضل', savage:'💀 شرس', party:'🎉 حفلة', all:'🌟 الكل',
+          names:'الأسماء', player:'لاعب', of:'من', enterName:'أدخل اسمك', namePlaceholder:'اسمك...', nameTaken:'هذا الاسم مستخدم!',
+          writeQuestions:'اكتب أسئلتك', questionHint:'سؤال...', atLeast2:'اكتب 2 على الأقل!',
+          confirm:'تأكيد →', screenCovered:'الشاشة مغطاة', passToNext:'مرر الهاتف للاعب التالي',
+          tapWhenReady:'اضغط عندما تكون جاهزاً →', iHavePhone:'الهاتف معي →', yourTurn:'دورك!', openBox:'افتح الصندوق',
+          chooseFate:'اختر مصيرك', truth:'حقيقة', dare:'جرأة', anonymous:'✨ مجهول', nextRound:'الجولة التالية →',
+          gameOver:'انتهت اللعبة!', playAgain:'العب مجدداً', sameGroup:'نفس المجموعة', quitConfirm:'هل تريد الخروج؟',
+          settingsTitle:'⚙ الإعدادات', language:'🌐 اللغة', theme:'🎨 المظهر', sounds:'🔊 الصوت', soundEffects:'المؤثرات',
+          answerTimer:'⏱️ وقت الإجابة', about:'📖 عن اللعبة', aboutText:'بوكس بارتي هي لعبة الحفلات المثالية.',
+          round:'جولة', leaderboard:'🏆 المتصدرون', score:'نقاط', loading:['تجهيز...','خلط الأوراق...','جاهز...']
+        },
+        en: { party:'PARTY', start:'▶ START', settings:'⚙ SETTINGS', gameMode:'GAME MODE', chooseMode:'Choose Mode',
+          mysteryBox:'Mystery Box', mysteryDesc:'Write secret questions. Random player opens the box',
+          truthDare:'Truth or Dare', truthDareDesc:'Write your own truths & dares',
+          roulette:'Random Roulette', rouletteDesc:'3000 ready-made questions in 6 categories',
+          'continue':'CONTINUE →', players:'PLAYERS', howMany:'How many?', choose2to10:'Choose 2 to 10',
+          category:'Select Category', pickCategory:'Which category?', startGame:'START GAME →',
+          spicy:'🔥 SPICY', funny:'😂 FUNNY', deep:'🤔 DEEP', wyr:'🎭 WYR', savage:'💀 SAVAGE', party:'🎉 PARTY', all:'🌟 ALL',
+          names:'NAMES', player:'Player', of:'of', enterName:'Enter your name', namePlaceholder:'Your name...', nameTaken:'Name taken!',
+          writeQuestions:'Write your questions', questionHint:'A question...', atLeast2:'Write at least 2!',
+          confirm:'CONFIRM →', screenCovered:'SCREEN COVERED', passToNext:'Pass to next player',
+          tapWhenReady:'TAP WHEN READY →', iHavePhone:'I HAVE THE PHONE →', yourTurn:'Your turn!', openBox:'Tap to open',
+          chooseFate:'Choose your fate', truth:'TRUTH', dare:'DARE', anonymous:'✨ Anonymous', nextRound:'NEXT ROUND →',
+          gameOver:'GAME OVER!', playAgain:'PLAY AGAIN', sameGroup:'SAME GROUP', quitConfirm:'Quit game?',
+          settingsTitle:'⚙ SETTINGS', language:'🌐 LANGUAGE', theme:'🎨 THEME', sounds:'🔊 SOUNDS', soundEffects:'Sound Effects',
+          answerTimer:'⏱️ ANSWER TIMER', about:'📖 ABOUT', aboutText:'Box Party is the ultimate party game.',
+          round:'Round', leaderboard:'🏆 LEADERBOARD', score:'Score', loading:['Preparing...','Shuffling...','Ready...']
+        }
+      };
+
+      // ==================== STATE ====================
+      const state = {
+        lang: 'ckb', mode: null, playerCount: 0, players: [], currentIdx: 0, phase: 'name',
+        gamePool: [], currentRound: 0, sounds: true, vibration: true, theme: 'dark',
+        timerSeconds: 60, timerInterval: null, scores: {}, history: ['menu'],
+        selectedCategory: 'all', categories: ['spicy','funny','deep','wyr','savage','party']
+      };
+
+      function t(key) { return I18N[state.lang]?.[key] || I18N.en[key] || key; }
+      function applyTranslations() {
+        document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+        document.documentElement.lang = state.lang;
+        document.documentElement.dir = (state.lang === 'ckb' || state.lang === 'ar') ? 'rtl' : 'ltr';
       }
 
+      // Audio
+      let audioCtx = null;
       function playSound(type) {
         if (!state.sounds) return;
         try {
-          const ctx = getAudio();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain);
-          gain.connect(ctx.destination);
+          const ctx = audioCtx || (audioCtx = new (window.AudioContext || window.webkitAudioContext)());
+          if (ctx.state === 'suspended') ctx.resume();
+          const osc = ctx.createOscillator(), gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
           const now = ctx.currentTime;
-          
-          if (type === 'click') {
-            osc.frequency.setValueAtTime(800, now);
-            osc.frequency.exponentialRampToValueAtTime(400, now + 0.08);
-            gain.gain.setValueAtTime(0.2, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-            osc.start(now); osc.stop(now + 0.1);
-          } else if (type === 'reveal') {
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(300, now);
-            osc.frequency.exponentialRampToValueAtTime(1000, now + 0.3);
-            gain.gain.setValueAtTime(0.25, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-            osc.start(now); osc.stop(now + 0.35);
-          } else if (type === 'win') {
-            [523, 659, 784, 1047].forEach((f, i) => {
-              const o = ctx.createOscillator();
-              const g = ctx.createGain();
-              o.connect(g); g.connect(ctx.destination);
-              o.frequency.value = f;
-              g.gain.setValueAtTime(0.2, now + i * 0.1);
-              g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.2);
-              o.start(now + i * 0.1); o.stop(now + i * 0.1 + 0.2);
-            });
-          }
+          if (type === 'click') { osc.frequency.value = 800; gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now+0.08); osc.start(now); osc.stop(now+0.08); }
+          else if (type === 'reveal') { osc.type='sine'; osc.frequency.setValueAtTime(300,now); osc.frequency.exponentialRampToValueAtTime(1000,now+0.25); gain.gain.setValueAtTime(0.2,now); gain.gain.exponentialRampToValueAtTime(0.01,now+0.3); osc.start(now); osc.stop(now+0.3); }
+          else if (type === 'win') { [523,659,784].forEach((f,i)=>{ const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=f; g.gain.setValueAtTime(0.15,now+i*0.1); g.gain.exponentialRampToValueAtTime(0.01,now+i*0.1+0.15); o.start(now+i*0.1); o.stop(now+i*0.1+0.15); }); }
         } catch(e) {}
       }
 
-      // ==================== CONFETTI ====================
       function confetti() {
-        const colors = ['#00f5d4', '#ff006e', '#ffd60a', '#7c3aed', '#00bfff'];
-        for (let i = 0; i < 40; i++) {
-          setTimeout(() => {
-            const el = document.createElement('div');
-            el.className = 'confetti';
-            const size = Math.random() * 12 + 6;
-            el.style.cssText = `left:${Math.random()*100}%; width:${size}px; height:${size*(0.5+Math.random()*0.8)}px; background:${colors[Math.floor(Math.random()*colors.length)]}; border-radius:${Math.random()>0.4?'50%':'3px'}; animation-duration:${1.5+Math.random()*2}s; transform:rotate(${Math.random()*360}deg);`;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 3500);
-          }, i * 40);
-        }
+        const colors=['#00f5d4','#ff006e','#ffd60a','#7c3aed'];
+        for(let i=0;i<30;i++){ setTimeout(()=>{ const el=document.createElement('div'); el.className='confetti'; el.style.cssText=`left:${Math.random()*100}%;width:${Math.random()*10+6}px;height:${Math.random()*8+8}px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-duration:${1.2+Math.random()*1.5}s;`; document.body.appendChild(el); setTimeout(()=>el.remove(),2500); },i*30); }
       }
 
-      // ==================== NAVIGATION ====================
+      function stopTimer() { if(state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval=null; } }
+      function startTimer(el, cb) {
+        stopTimer();
+        if(state.timerSeconds<=0) return;
+        let remaining = state.timerSeconds;
+        el.textContent = `⏱️ ${Math.floor(remaining/60)}:${(remaining%60).toString().padStart(2,'0')}`;
+        state.timerInterval = setInterval(() => {
+          remaining--;
+          el.textContent = `⏱️ ${Math.floor(remaining/60)}:${(remaining%60).toString().padStart(2,'0')}`;
+          if(remaining<=0) { stopTimer(); if(cb) cb(); }
+        }, 1000);
+      }
+
       function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        if (!state.history.includes(id)) state.history.push(id);
+        if(!state.history.includes(id)) state.history.push(id);
+        applyTranslations();
       }
 
-      function goBack() {
-        if (state.history.length > 1) {
-          state.history.pop();
-          const prev = state.history[state.history.length - 1];
-          showScreen(prev);
-        }
-        playSound('click');
-      }
-
-      // ==================== KEYBOARD FIX ====================
-      document.addEventListener('focusin', (e) => {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-          setTimeout(() => {
-            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 100);
-        }
-      });
-
-      // ==================== APP METHODS ====================
+      // ==================== APP ====================
       const app = {
-        startGame() {
-          playSound('click');
-          state.history = ['menu', 'modeSelect'];
-          showScreen('modeSelect');
-          document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-          document.getElementById('modeNextBtn').disabled = true;
-          state.mode = null;
-        },
-
-        selectMode(mode) {
-          playSound('click');
-          state.mode = mode;
-          document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
-          document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
-          document.getElementById('modeNextBtn').disabled = false;
-        },
-
+        startGame() { playSound('click'); state.history=['menu','modeSelect']; showScreen('modeSelect'); document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('active')); document.getElementById('modeNextBtn').disabled=true; state.mode=null; },
+        selectMode(mode) { playSound('click'); state.mode=mode; document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('active')); document.querySelector(`[data-mode="${mode}"]`).classList.add('active'); document.getElementById('modeNextBtn').disabled=false; },
         goToCount() {
-          if (!state.mode) return;
+          if(!state.mode) return;
           playSound('click');
-          state.history.push('playerCount');
-          showScreen('playerCount');
-          
-          const grid = document.getElementById('countGrid');
-          grid.innerHTML = '';
-          for (let i = 2; i <= 10; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'count-btn';
-            btn.textContent = i;
-            btn.onclick = () => {
-              document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
-              btn.classList.add('active');
-              state.playerCount = i;
-              document.getElementById('countNextBtn').disabled = false;
-              playSound('click');
-            };
-            grid.appendChild(btn);
-          }
+          if(state.mode === 'roulette') { state.history.push('categorySelect'); showScreen('categorySelect'); app.renderCategories(); }
+          else { state.history.push('playerCount'); showScreen('playerCount'); app.renderCountGrid(); }
         },
-
-        goToNames() {
-          if (!state.playerCount) return;
-          playSound('click');
-          state.players = [];
-          state.currentIdx = 0;
-          state.phase = 'name';
-          state.history.push('nameEntry');
-          showScreen('nameEntry');
-          this.renderNameEntry();
+        renderCategories() {
+          const grid = document.getElementById('categoryGrid');
+          const cats = [...state.categories, 'all'];
+          grid.innerHTML = cats.map(cat => `
+            <div class="category-btn ${cat==='all'?'active':''}" data-cat="${cat}" onclick="app.selectCategory('${cat}')">
+              <span class="cat-emoji">${cat==='spicy'?'🔥':cat==='funny'?'😂':cat==='deep'?'🤔':cat==='wyr'?'🎭':cat==='savage'?'💀':cat==='party'?'🎉':'🌟'}</span>
+              <span class="cat-name">${t(cat)}</span>
+            </div>
+          `).join('');
+          state.selectedCategory = 'all';
         },
-
+        selectCategory(cat) { playSound('click'); state.selectedCategory=cat; document.querySelectorAll('.category-btn').forEach(b=>b.classList.remove('active')); document.querySelector(`[data-cat="${cat}"]`).classList.add('active'); },
+        confirmCategory() { playSound('click'); state.history.push('playerCount'); showScreen('playerCount'); app.renderCountGrid(); },
+        renderCountGrid() {
+          const grid=document.getElementById('countGrid'); grid.innerHTML='';
+          for(let i=2;i<=10;i++){ const b=document.createElement('button'); b.className='count-btn'; b.textContent=i; b.onclick=()=>{ document.querySelectorAll('.count-btn').forEach(btn=>btn.classList.remove('active')); b.classList.add('active'); state.playerCount=i; document.getElementById('countNextBtn').disabled=false; playSound('click'); }; grid.appendChild(b); }
+        },
+        goToNames() { if(!state.playerCount) return; playSound('click'); state.players=[]; state.currentIdx=0; state.phase='name'; state.history.push('nameEntry'); showScreen('nameEntry'); app.renderNameEntry(); },
         renderNameEntry() {
-          const idx = state.currentIdx;
-          const total = state.playerCount;
-          const progress = (idx / total) * 100;
-          document.getElementById('nameProgressFill').style.width = progress + '%';
-          
-          const existing = state.players[idx]?.name || '';
-          document.getElementById('nameEntryContent').innerHTML = `
-            <div style="text-align:center; margin-bottom:24px;">
-              <div style="font-size:56px; margin-bottom:16px;">👤</div>
-              <h2 style="font-family:var(--fd);">Player ${idx + 1} of ${total}</h2>
-              <p style="color:var(--text-dim);">Enter your name</p>
-            </div>
-            <div class="input-wrapper">
-              <input class="game-input" id="playerNameInput" type="text" placeholder="Your name..." value="${existing}" maxlength="20" autocomplete="off">
-            </div>
-            <button class="btn btn-primary" onclick="app.submitName()">CONTINUE →</button>
-          `;
-          setTimeout(() => document.getElementById('playerNameInput')?.focus(), 100);
+          const idx=state.currentIdx, total=state.playerCount;
+          document.getElementById('nameProgressFill').style.width=(idx/total*100)+'%';
+          const existing=state.players[idx]?.name||'';
+          document.getElementById('nameEntryContent').innerHTML=`<div style="text-align:center;margin-bottom:20px;"><div style="font-size:50px;">👤</div><h2>${t('player')} ${idx+1} ${t('of')} ${total}</h2></div><div class="input-wrapper"><input class="game-input" id="playerNameInput" placeholder="${t('namePlaceholder')}" value="${existing}" maxlength="20"></div><button class="btn btn-primary" onclick="app.submitName()">${t('continue')}</button>`;
+          setTimeout(()=>document.getElementById('playerNameInput')?.focus(),100);
         },
-
         submitName() {
-          const input = document.getElementById('playerNameInput');
-          const name = input?.value.trim();
-          if (!name) {
-            input.style.borderColor = 'var(--secondary)';
-            return;
-          }
-          
-          // Check duplicate
-          if (state.players.some((p, i) => i !== state.currentIdx && p.name.toLowerCase() === name.toLowerCase())) {
-            alert('This name is already taken! Choose another.');
-            return;
-          }
-          
+          const input=document.getElementById('playerNameInput'), name=input?.value.trim();
+          if(!name) { input.classList.add('error'); setTimeout(()=>input.classList.remove('error'),300); return; }
+          if(state.players.some((p,i)=>i!==state.currentIdx && p.name.toLowerCase()===name.toLowerCase())) { alert(t('nameTaken')); return; }
           playSound('click');
-          
-          if (state.players[state.currentIdx]) {
-            state.players[state.currentIdx].name = name;
-          } else {
-            state.players[state.currentIdx] = { 
-              name, 
-              questions: [], 
-              truths: [], 
-              dares: [] 
-            };
-          }
-          
+          if(state.players[state.currentIdx]) state.players[state.currentIdx].name=name;
+          else { state.players[state.currentIdx]={name, questions:[], truths:[], dares:[]}; state.scores[name]=0; }
           state.currentIdx++;
-          
-          if (state.currentIdx < state.playerCount) {
-            this.renderNameEntry();
-          } else {
-            // All names entered, go to cover screen for pass
-            state.currentIdx = 0;
-            state.phase = state.mode === 'mystery' ? 'questions' : 'truths';
-            this.showCover();
+          if(state.currentIdx < state.playerCount) app.renderNameEntry();
+          else {
+            state.currentIdx=0;
+            if(state.mode==='roulette') app.beginRoulette();
+            else { state.phase = state.mode==='mystery'?'questions':'truths'; app.showCover(); }
           }
         },
-
         showCover() {
-          state.history.push('cover');
-          showScreen('cover');
-          const idx = state.currentIdx;
-          const player = state.players[idx];
-          
-          document.getElementById('coverEmoji').textContent = ['🙈','🙉','🙊','🤫'][idx % 4];
-          document.getElementById('coverTitle').textContent = `PASS TO ${player.name.toUpperCase()}`;
-          document.getElementById('coverText').textContent = `Player ${idx + 1} of ${state.playerCount} — Your turn to write!`;
-          document.getElementById('coverBtn').textContent = idx === 0 ? 'TAP TO START →' : 'I HAVE THE PHONE →';
+          state.history.push('cover'); showScreen('cover');
+          const p=state.players[state.currentIdx];
+          document.getElementById('coverEmoji').textContent=['🙈','🙉','🙊','🤫'][state.currentIdx%4];
+          document.getElementById('coverTitle').textContent=t('screenCovered');
+          document.getElementById('coverText').textContent=`${t('passToNext')} — ${p.name}`;
+          document.getElementById('coverBtn').textContent=state.currentIdx===0?t('tapWhenReady'):t('iHavePhone');
         },
-
-        nextFromCover() {
-          playSound('click');
-          this.renderContentCreation();
-        },
-
+        nextFromCover() { playSound('click'); app.renderContentCreation(); },
         renderContentCreation() {
-          const idx = state.currentIdx;
-          const player = state.players[idx];
-          const total = state.playerCount;
-          const progress = ((idx + 1) / total) * 100;
-          
-          state.history.push('contentCreation');
-          showScreen('contentCreation');
-          document.getElementById('contentProgressFill').style.width = progress + '%';
-          
-          let html = '';
-          const phase = state.phase;
-          
-          if (state.mode === 'mystery') {
-            document.getElementById('contentTitle').textContent = `${player.name} — QUESTIONS`;
-            html = `
-              <div style="text-align:center; margin-bottom:20px;">
-                <span style="font-size:48px;">🎁</span>
-                <p style="color:var(--text-dim); margin-top:8px;">Write 3 secret questions about yourself</p>
-              </div>
-            `;
-            for (let i = 0; i < 3; i++) {
-              html += `
-                <div class="input-wrapper">
-                  <label class="input-label">Question ${i + 1}</label>
-                  <input class="game-input" id="q${i}" type="text" placeholder="A question someone must answer..." maxlength="120" value="${player.questions[i] || ''}">
-                </div>
-              `;
-            }
-            html += `<button class="btn btn-primary" onclick="app.submitContent()">CONFIRM & CONTINUE →</button>`;
+          const idx=state.currentIdx, p=state.players[idx], total=state.playerCount;
+          state.history.push('contentCreation'); showScreen('contentCreation');
+          document.getElementById('contentProgressFill').style.width=((idx+1)/total*100)+'%';
+          document.getElementById('playerProgress').textContent=`${idx+1}/${total}`;
+          startTimer(document.getElementById('questionTimer'), ()=>app.submitContent());
+          let html='';
+          if(state.mode==='mystery') {
+            document.getElementById('contentTitle').textContent=`${p.name} — ${t('mysteryBox')}`;
+            html=`<div style="text-align:center;margin-bottom:16px;"><span style="font-size:40px;">🎁</span><p>${t('writeQuestions')}</p></div>`;
+            for(let i=0;i<3;i++) html+=`<div class="input-wrapper"><label class="input-label">${t('mysteryBox')} ${i+1}</label><input class="game-input" id="q${i}" placeholder="${t('questionHint')}" value="${p.questions[i]||''}"></div>`;
           } else {
-            if (phase === 'truths') {
-              document.getElementById('contentTitle').textContent = `${player.name} — TRUTHS`;
-              html = `
-                <div style="text-align:center; margin-bottom:20px;">
-                  <span style="font-size:48px;">✅</span>
-                  <p style="color:var(--text-dim); margin-top:8px;">Write 3 truths about yourself</p>
-                </div>
-              `;
-              for (let i = 0; i < 3; i++) {
-                html += `
-                  <div class="input-wrapper">
-                    <label class="input-label">Truth ${i + 1}</label>
-                    <input class="game-input" id="t${i}" type="text" placeholder="Something true about you..." maxlength="120" value="${player.truths[i] || ''}">
-                  </div>
-                `;
-              }
+            if(state.phase==='truths') {
+              document.getElementById('contentTitle').textContent=`${p.name} — ${t('truth')}`;
+              html=`<div style="text-align:center;margin-bottom:16px;"><span style="font-size:40px;">✅</span><p>${t('truthDareDesc')}</p></div>`;
+              for(let i=0;i<3;i++) html+=`<div class="input-wrapper"><label class="input-label">${t('truth')} ${i+1}</label><input class="game-input" id="t${i}" value="${p.truths[i]||''}"></div>`;
             } else {
-              document.getElementById('contentTitle').textContent = `${player.name} — DARES`;
-              html = `
-                <div style="text-align:center; margin-bottom:20px;">
-                  <span style="font-size:48px;">🔥</span>
-                  <p style="color:var(--text-dim); margin-top:8px;">Write 3 dares for others</p>
-                </div>
-              `;
-              for (let i = 0; i < 3; i++) {
-                html += `
-                  <div class="input-wrapper">
-                    <label class="input-label">Dare ${i + 1}</label>
-                    <input class="game-input" id="d${i}" type="text" placeholder="A challenge for someone..." maxlength="120" value="${player.dares[i] || ''}">
-                  </div>
-                `;
-              }
+              document.getElementById('contentTitle').textContent=`${p.name} — ${t('dare')}`;
+              html=`<div style="text-align:center;margin-bottom:16px;"><span style="font-size:40px;">🔥</span><p>${t('truthDareDesc')}</p></div>`;
+              for(let i=0;i<3;i++) html+=`<div class="input-wrapper"><label class="input-label">${t('dare')} ${i+1}</label><input class="game-input" id="d${i}" value="${p.dares[i]||''}"></div>`;
             }
-            html += `<button class="btn btn-primary" onclick="app.submitContent()">CONFIRM →</button>`;
           }
-          
-          document.getElementById('contentArea').innerHTML = html;
+          html+=`<button class="btn btn-primary" onclick="app.submitContent()">${t('confirm')}</button>`;
+          document.getElementById('contentArea').innerHTML=html;
         },
-
         submitContent() {
-          const idx = state.currentIdx;
-          const player = state.players[idx];
-          
-          if (state.mode === 'mystery') {
-            const qs = [0, 1, 2].map(i => document.getElementById(`q${i}`)?.value.trim()).filter(Boolean);
-            if (qs.length < 2) {
-              alert('Please write at least 2 questions!');
-              return;
-            }
-            player.questions = qs;
+          const idx=state.currentIdx, p=state.players[idx];
+          if(state.mode==='mystery') {
+            const qs=[0,1,2].map(i=>document.getElementById(`q${i}`)?.value.trim()).filter(Boolean);
+            if(qs.length<2) { alert(t('atLeast2')); return; }
+            p.questions=qs;
           } else {
-            if (state.phase === 'truths') {
-              const ts = [0, 1, 2].map(i => document.getElementById(`t${i}`)?.value.trim()).filter(Boolean);
-              if (ts.length < 2) {
-                alert('Please write at least 2 truths!');
-                return;
-              }
-              player.truths = ts;
-              state.phase = 'dares';
-              this.renderContentCreation();
-              return;
+            if(state.phase==='truths') {
+              const ts=[0,1,2].map(i=>document.getElementById(`t${i}`)?.value.trim()).filter(Boolean);
+              if(ts.length<2) { alert(t('atLeast2')); return; }
+              p.truths=ts; state.phase='dares'; stopTimer(); app.renderContentCreation(); return;
             } else {
-              const ds = [0, 1, 2].map(i => document.getElementById(`d${i}`)?.value.trim()).filter(Boolean);
-              if (ds.length < 2) {
-                alert('Please write at least 2 dares!');
-                return;
-              }
-              player.dares = ds;
+              const ds=[0,1,2].map(i=>document.getElementById(`d${i}`)?.value.trim()).filter(Boolean);
+              if(ds.length<2) { alert(t('atLeast2')); return; }
+              p.dares=ds;
             }
           }
-          
-          playSound('click');
-          state.currentIdx++;
-          
-          if (state.currentIdx < state.playerCount) {
-            state.phase = state.mode === 'mystery' ? 'questions' : 'truths';
-            this.showCover();
-          } else {
-            // All done, start game!
-            this.beginGame();
-          }
+          playSound('click'); stopTimer(); state.currentIdx++;
+          if(state.currentIdx < state.playerCount) { state.phase=state.mode==='mystery'?'questions':'truths'; app.showCover(); }
+          else app.beginGame();
         },
-
-        beginGame() {
-          // Build game pool
+        beginRoulette() {
           state.gamePool = [];
-          
-          if (state.mode === 'mystery') {
-            state.players.forEach((p, pi) => {
-              p.questions.forEach(q => {
-                state.gamePool.push({ text: q, used: false, ownerIdx: pi, type: 'question' });
-              });
-            });
-          } else {
-            state.players.forEach((p, pi) => {
-              p.truths.forEach(t => {
-                state.gamePool.push({ text: t, used: false, ownerIdx: pi, type: 'truth' });
-              });
-              p.dares.forEach(d => {
-                state.gamePool.push({ text: d, used: false, ownerIdx: pi, type: 'dare' });
-              });
-            });
-          }
-          
-          // Shuffle
-          for (let i = state.gamePool.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [state.gamePool[i], state.gamePool[j]] = [state.gamePool[j], state.gamePool[i]];
-          }
-          
-          state.currentRound = 0;
-          state.history = ['game'];
-          showScreen('game');
-          this.nextRound();
+          const cats = state.selectedCategory === 'all' ? state.categories : [state.selectedCategory];
+          cats.forEach(cat => {
+            const questions = Q_DB[state.lang]?.[cat] || Q_DB.en[cat] || [];
+            questions.forEach(q => state.gamePool.push({ text: q, used: false, type: cat }));
+          });
+          for(let i=state.gamePool.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [state.gamePool[i],state.gamePool[j]]=[state.gamePool[j],state.gamePool[i]]; }
+          state.currentRound=0; state.history=['game']; showScreen('game'); app.nextRound();
+        },
+        beginGame() {
+          state.gamePool=[];
+          if(state.mode==='mystery') state.players.forEach((p,pi)=>p.questions.forEach(q=>state.gamePool.push({text:q,used:false,ownerIdx:pi,type:'question'})));
+          else state.players.forEach((p,pi)=>{ p.truths.forEach(t=>state.gamePool.push({text:t,used:false,ownerIdx:pi,type:'truth'})); p.dares.forEach(d=>state.gamePool.push({text:d,used:false,ownerIdx:pi,type:'dare'})); });
+          for(let i=state.gamePool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [state.gamePool[i],state.gamePool[j]]=[state.gamePool[j],state.gamePool[i]]; }
+          state.currentRound=0; state.history=['game']; showScreen('game'); app.nextRound();
         },
         nextRound() {
-          const unused = state.gamePool.filter(item => !item.used);
-          
-          if (unused.length === 0) {
-            this.endGame();
-            return;
-          }
-          
+          const unused = state.gamePool.filter(i=>!i.used);
+          if(unused.length===0) { app.endGame(); return; }
           state.currentRound++;
+          const opener = state.players[Math.floor(Math.random()*state.players.length)] || { name: 'Player', emoji: '🎲' };
+          document.getElementById('gameTitle').textContent = `${t('round')} ${state.currentRound}`;
+          document.getElementById('roundDisplay').textContent = `${t('round')} ${state.currentRound}`;
+          startTimer(document.getElementById('gameTimer'), ()=>app.nextRound());
           
-          // Pick random player to be the "opener"
-          const openerIdx = Math.floor(Math.random() * state.players.length);
-          const opener = state.players[openerIdx];
-          
-          document.getElementById('gameTitle').textContent = `ROUND ${state.currentRound}`;
-          
-          if (state.mode === 'mystery') {
-            // Pick random unused question
-            const avail = state.gamePool.filter(q => !q.used);
-            const picked = avail[Math.floor(Math.random() * avail.length)];
-            picked.used = true;
-            
-            document.getElementById('gameContent').innerHTML = `
-              <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-                <div class="player-avatar" style="background:${this.getColor(openerIdx)}22; border-color:${this.getColor(openerIdx)};">
-                  ${this.getEmoji(openerIdx)}
-                </div>
-                <h2 style="font-family:var(--fd); font-size:28px; text-align:center; margin-bottom:8px; color:${this.getColor(openerIdx)};">
-                  ${opener.name}
-                </h2>
-                <p style="color:var(--text-dim); text-align:center; margin-bottom:20px;">It's your turn!</p>
-                
-                <div class="mystery-box" id="mysteryBox" onclick="app.openMysteryBox('${picked.text.replace(/'/g, "\\'")}')">
-                  🎁
-                </div>
-                <p style="color:var(--text-dim); text-align:center; margin-top:12px; font-size:13px;">Tap the box to reveal</p>
-              </div>
-            `;
+          if(state.mode==='mystery') {
+            const picked = unused[Math.floor(Math.random()*unused.length)]; picked.used = true;
+            document.getElementById('gameContent').innerHTML = `<div style="flex:1;display:flex;flex-direction:column;justify-content:center;"><div class="player-avatar">${app.getEmoji(state.players.indexOf(opener))}</div><h2 style="font-family:var(--fd);text-align:center;">${opener.name}</h2><p style="color:var(--text-dim);text-align:center;">${t('yourTurn')}</p><div class="mystery-box" id="mysteryBox" onclick="app.openBox('${picked.text.replace(/'/g,"\\'")}', ${state.players.indexOf(opener)})">🎁</div><p style="color:var(--text-dim);text-align:center;margin-top:12px;">${t('openBox')}</p></div>`;
+          } else if(state.mode==='roulette') {
+            const picked = unused[Math.floor(Math.random()*unused.length)]; picked.used = true;
+            document.getElementById('gameContent').innerHTML = `<div style="flex:1;display:flex;flex-direction:column;justify-content:center;"><div class="player-avatar">${app.getEmoji(state.players.indexOf(opener))}</div><h2 style="font-family:var(--fd);text-align:center;">${opener.name}</h2><p style="color:var(--text-dim);text-align:center;">${t('yourTurn')}</p><div class="mystery-box" id="mysteryBox" onclick="app.openRoulette('${picked.text.replace(/'/g,"\\'")}', '${picked.type}')">🎲</div><p style="color:var(--text-dim);text-align:center;margin-top:12px;">${t('openBox')}</p></div>`;
           } else {
-            // Truth or Dare - pick random player as target
-            const targetIdx = Math.floor(Math.random() * state.players.length);
-            const target = state.players[targetIdx];
-            
-            document.getElementById('gameContent').innerHTML = `
-              <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-                <div class="player-avatar" style="background:${this.getColor(targetIdx)}22; border-color:${this.getColor(targetIdx)};">
-                  ${this.getEmoji(targetIdx)}
-                </div>
-                <h2 style="font-family:var(--fd); font-size:28px; text-align:center; margin-bottom:8px; color:${this.getColor(targetIdx)};">
-                  ${target.name}
-                </h2>
-                <p style="color:var(--text-dim); text-align:center; margin-bottom:24px;">Choose your fate!</p>
-                
-                <div class="td-row">
-                  <button class="td-btn truth" onclick="app.chooseTD('truth', ${targetIdx})">✅ TRUTH</button>
-                  <button class="td-btn dare" onclick="app.chooseTD('dare', ${targetIdx})">🔥 DARE</button>
-                </div>
-              </div>
-            `;
+            const target = state.players[Math.floor(Math.random()*state.players.length)];
+            document.getElementById('gameContent').innerHTML = `<div style="flex:1;display:flex;flex-direction:column;justify-content:center;"><div class="player-avatar">${app.getEmoji(state.players.indexOf(target))}</div><h2 style="font-family:var(--fd);text-align:center;">${target.name}</h2><p style="color:var(--text-dim);text-align:center;">${t('chooseFate')}</p><div class="td-row"><button class="td-btn truth" onclick="app.chooseTD('truth',${state.players.indexOf(target)})">✅ ${t('truth')}</button><button class="td-btn dare" onclick="app.chooseTD('dare',${state.players.indexOf(target)})">🔥 ${t('dare')}</button></div></div>`;
           }
         },
-
-        openMysteryBox(text) {
-          const box = document.getElementById('mysteryBox');
-          if (!box || box.classList.contains('opening')) return;
-          
-          playSound('reveal');
-          box.classList.add('opening');
-          
-          setTimeout(() => {
-            confetti();
-            playSound('win');
-            document.getElementById('gameContent').innerHTML = `
-              <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-                <div class="reveal-card">
-                  <div class="rc-label">🎁 QUESTION</div>
-                  <div class="rc-text">${this.escapeHtml(text)}</div>
-                  <div class="rc-anon">✨ Anonymous</div>
-                </div>
-                <button class="btn btn-primary" onclick="app.nextRound()">NEXT ROUND →</button>
-              </div>
-            `;
-          }, 500);
+        openBox(text, openerIdx) {
+          const box=document.getElementById('mysteryBox'); if(!box||box.classList.contains('opening')) return;
+          stopTimer(); playSound('reveal'); box.classList.add('opening');
+          state.scores[state.players[openerIdx]?.name] = (state.scores[state.players[openerIdx]?.name]||0)+1;
+          setTimeout(()=>{ confetti(); playSound('win');
+            document.getElementById('gameContent').innerHTML=`<div style="flex:1;display:flex;flex-direction:column;justify-content:center;"><div class="reveal-card"><div class="rc-label">🎁 ${t('mysteryBox')}</div><div class="rc-text">${app.escape(text)}</div><div class="rc-anon">${t('anonymous')}</div></div><button class="btn btn-primary" onclick="app.nextRound()">${t('nextRound')}</button></div>`;
+          },500);
         },
-
+        openRoulette(text, category) {
+          const box=document.getElementById('mysteryBox'); if(!box||box.classList.contains('opening')) return;
+          stopTimer(); playSound('reveal'); box.classList.add('opening');
+          setTimeout(()=>{ confetti(); playSound('win');
+            document.getElementById('gameContent').innerHTML=`<div style="flex:1;display:flex;flex-direction:column;justify-content:center;"><div class="reveal-card"><div class="rc-label">${t(category) || category}</div><div class="rc-text">${app.escape(text)}</div></div><button class="btn btn-primary" onclick="app.nextRound()">${t('nextRound')}</button></div>`;
+          },500);
+        },
         chooseTD(type, targetIdx) {
-          playSound('click');
-          
-          const target = state.players[targetIdx];
-          const pool = state.gamePool.filter(item => !item.used && item.ownerIdx === targetIdx && item.type === type);
-          
-          let picked;
-          if (pool.length > 0) {
-            picked = pool[Math.floor(Math.random() * pool.length)];
-          } else {
-            // Fallback to other type or any
-            const any = state.gamePool.filter(item => !item.used);
-            if (any.length === 0) {
-              this.endGame();
-              return;
-            }
-            picked = any[Math.floor(Math.random() * any.length)];
-          }
-          
+          stopTimer(); playSound('click');
+          const target=state.players[targetIdx];
+          let picked = state.gamePool.filter(i=>!i.used && i.ownerIdx===targetIdx && i.type===type)[0];
+          if(!picked) picked = state.gamePool.filter(i=>!i.used)[0];
+          if(!picked) { app.endGame(); return; }
           picked.used = true;
-          
-          confetti();
-          playSound('win');
-          
-          const colors = {
-            truth: 'linear-gradient(135deg, #00c853, #1b5e20)',
-            dare: 'linear-gradient(135deg, #ff006e, #b71c1c)'
-          };
-          const labels = { truth: '✅ TRUTH', dare: '🔥 DARE' };
-          
-          document.getElementById('gameContent').innerHTML = `
-            <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-              <div class="reveal-card" style="background:${colors[picked.type] || colors.truth}">
-                <div class="rc-label">${labels[picked.type]}</div>
-                <div class="rc-text">${this.escapeHtml(picked.text)}</div>
-                <div class="rc-anon">From ${target.name}'s ${picked.type}s</div>
-              </div>
-              <button class="btn btn-primary" onclick="app.nextRound()">NEXT ROUND →</button>
-            </div>
-          `;
+          state.scores[target.name] = (state.scores[target.name]||0)+1;
+          confetti(); playSound('win');
+          document.getElementById('gameContent').innerHTML=`<div style="flex:1;display:flex;flex-direction:column;justify-content:center;"><div class="reveal-card" style="background:${type==='truth'?'linear-gradient(135deg,#00c853,#1b5e20)':'linear-gradient(135deg,#ff006e,#b71c1c)'}"><div class="rc-label">${type==='truth'?'✅ '+t('truth'):'🔥 '+t('dare')}</div><div class="rc-text">${app.escape(picked.text)}</div><div class="rc-anon">${t('anonymous')}</div></div><button class="btn btn-primary" onclick="app.nextRound()">${t('nextRound')}</button></div>`;
         },
-
         endGame() {
-          confetti();
-          playSound('win');
-          setTimeout(() => {
-            state.history = ['gameOver'];
-            showScreen('gameOver');
-          }, 400);
+          stopTimer(); confetti(); playSound('win');
+          const sorted=Object.entries(state.scores).sort((a,b)=>b[1]-a[1]);
+          document.getElementById('leaderboard').innerHTML=`<h3>${t('leaderboard')}</h3>`+sorted.map(([n,s],i)=>`<div style="display:flex;gap:10px;padding:8px;background:var(--card);border-radius:30px;margin-bottom:6px;"><span style="width:30px;height:30px;border-radius:50%;background:var(--primary);color:#000;display:flex;align-items:center;justify-content:center;font-weight:700;">${i+1}</span><span style="flex:1;">${n}</span><span style="font-family:var(--fd);">${s} ${t('score')}</span></div>`).join('');
+          setTimeout(()=>{ state.history=['gameOver']; showScreen('gameOver'); },400);
         },
-
-        sameGroup() {
-          // Keep names, clear content
-          state.players.forEach(p => {
-            p.questions = [];
-            p.truths = [];
-            p.dares = [];
-          });
-          state.currentIdx = 0;
-          state.phase = state.mode === 'mystery' ? 'questions' : 'truths';
-          this.showCover();
-        },
-
-        quitGame() {
-          if (confirm('Quit this game? Progress will be lost.')) {
-            playSound('click');
-            this.goToMenu();
-          }
-        },
-
-        goToMenu() {
-          state.history = ['menu'];
-          showScreen('menu');
-        },
-
-        goBack,
-
-        openSettings() {
-          playSound('click');
-          document.getElementById('settingsOverlay').classList.add('visible');
-          document.getElementById('settingsPanel').classList.add('visible');
-        },
-
-        closeSettings() {
-          playSound('click');
-          document.getElementById('settingsOverlay').classList.remove('visible');
-          document.getElementById('settingsPanel').classList.remove('visible');
-        },
-
-        setTheme(theme) {
-          playSound('click');
-          state.theme = theme;
-          document.body.className = document.body.className.replace(/theme-\S+/g, '').trim();
-          if (theme !== 'dark') document.body.classList.add('theme-' + theme);
-          document.querySelectorAll('[data-theme]').forEach(b => b.classList.remove('active'));
-          document.querySelector(`[data-theme="${theme}"]`).classList.add('active');
-          localStorage.setItem('bp_theme', theme);
-        },
-
-        toggleSound() {
-          state.sounds = !state.sounds;
-          document.getElementById('soundToggle').classList.toggle('on', state.sounds);
-          localStorage.setItem('bp_sound', state.sounds ? '1' : '0');
-          if (state.sounds) playSound('click');
-        },
-
-        getEmoji(idx) {
-          return ['🦁','🐯','🦊','🐺','🐸','🦋','🦄','🐉','🦅','🐙'][idx % 10];
-        },
-
-        getColor(idx) {
-          return ['#00f5d4','#ff006e','#ffd60a','#7c3aed','#00bfff','#ff6b35','#32cd32','#ff1493','#ff8c00','#60a5fa'][idx % 10];
-        },
-
-        escapeHtml(s) {
-          return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        }
+        sameGroup() { state.players.forEach(p=>{ p.questions=[]; p.truths=[]; p.dares=[]; }); state.scores={}; state.players.forEach(p=>state.scores[p.name]=0); state.currentIdx=0; if(state.mode==='roulette') app.beginRoulette(); else { state.phase=state.mode==='mystery'?'questions':'truths'; app.showCover(); } },
+        quitGame() { if(confirm(t('quitConfirm'))) { stopTimer(); playSound('click'); app.goToMenu(); } },
+        goToMenu() { stopTimer(); state.history=['menu']; showScreen('menu'); },
+        goBack() { if(state.history.length>1) { state.history.pop(); showScreen(state.history[state.history.length-1]); } playSound('click'); },
+        openSettings() { playSound('click'); document.getElementById('settingsOverlay').classList.add('visible'); document.getElementById('settingsPanel').classList.add('visible'); },
+        closeSettings() { playSound('click'); document.getElementById('settingsOverlay').classList.remove('visible'); document.getElementById('settingsPanel').classList.remove('visible'); },
+        setLanguage(lang) { playSound('click'); state.lang=lang; localStorage.setItem('bp_lang',lang); document.querySelectorAll('.lang-option').forEach(el=>el.classList.toggle('active',el.dataset.lang===lang)); document.documentElement.lang=lang; document.documentElement.dir=(lang==='ckb'||lang==='ar')?'rtl':'ltr'; applyTranslations(); },
+        setTheme(theme) { playSound('click'); state.theme=theme; document.body.className=document.body.className.replace(/theme-\S+/g,'').trim(); if(theme!=='dark') document.body.classList.add('theme-'+theme); document.querySelectorAll('[data-theme]').forEach(b=>b.classList.remove('active')); document.querySelector(`[data-theme="${theme}"]`).classList.add('active'); localStorage.setItem('bp_theme',theme); },
+        toggleSound() { state.sounds=!state.sounds; document.getElementById('soundToggle').classList.toggle('on',state.sounds); localStorage.setItem('bp_sound',state.sounds?'1':'0'); if(state.sounds) playSound('click'); },
+        setTimer(v) { state.timerSeconds=parseInt(v); localStorage.setItem('bp_timer',v); },
+        getEmoji(i) { return ['🦁','🐯','🦊','🐺','🐸','🦋','🦄','🐉','🦅','🐙'][i%10]; },
+        escape(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
       };
 
-      // ==================== INIT ====================
+      // Init
       window.app = app;
-      
-      // Load preferences
+      const savedLang = localStorage.getItem('bp_lang') || 'ckb';
       const savedTheme = localStorage.getItem('bp_theme') || 'dark';
-      const savedSound = localStorage.getItem('bp_sound') !== '0';
-      if (savedTheme !== 'dark') document.body.classList.add('theme-' + savedTheme);
-      state.theme = savedTheme;
-      state.sounds = savedSound;
+      state.lang = savedLang; state.theme = savedTheme; state.sounds = localStorage.getItem('bp_sound')!=='0';
+      document.documentElement.lang = savedLang;
+      document.documentElement.dir = (savedLang==='ckb'||savedLang==='ar')?'rtl':'ltr';
+      if(savedTheme!=='dark') document.body.classList.add('theme-'+savedTheme);
       
-      // Loading sequence
-      const loadTexts = ['Preparing party...', 'Shuffling cards...', 'Almost ready...'];
-      let li = 0;
-      const loadEl = document.getElementById('loadText');
-      const iv = setInterval(() => {
-        li = (li + 1) % loadTexts.length;
-        if (loadEl) loadEl.textContent = loadTexts[li];
-      }, 600);
+      const loadTexts = I18N[savedLang]?.loading || ['Loading...'];
+      let li=0; const loadEl=document.getElementById('loadText');
+      const iv = setInterval(()=>{ li=(li+1)%loadTexts.length; if(loadEl) loadEl.textContent=loadTexts[li]; },500);
       
-      setTimeout(() => {
+      // FIXED: Loading screen properly fades out
+      setTimeout(()=>{
         clearInterval(iv);
-        document.getElementById('loading').style.opacity = '0';
-        setTimeout(() => {
-          document.getElementById('loading').style.display = 'none';
-          showScreen('menu');
-        }, 400);
-      }, 2500);
+        const loadingEl = document.getElementById('loading');
+        if(loadingEl) {
+          loadingEl.style.opacity = '0';
+          setTimeout(()=>{
+            loadingEl.style.display = 'none';
+            showScreen('menu');
+            applyTranslations();
+          }, 400);
+        }
+      }, 2000);
     })();
   </script>
 </body>
