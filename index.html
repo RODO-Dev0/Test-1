@@ -376,86 +376,116 @@
                     ctx.fillStyle = "#5a4a3a";
                     ctx.beginPath();
                     ctx.ellipse(obs.x+15, obs.y+12, 14, 12, 0, 0, Math.PI*2);
-                    ctx.fill();
-                    ctx.fillStyle = "#3a2a1a";
-                    ctx.beginPath();
-                    ctx.ellipse(obs.x+10, obs.y+8, 5, 5, 0, 0, Math.PI*2);
-                    ctx.fill();
-                } else if(obs.type === 1){ // log
-                    ctx.fillStyle = "#8B5A2B";
-                    ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-                    ctx.fillStyle = "#5a3a1a";
-                    for(let i=0;i<3;i++) ctx.fillRect(obs.x+5+i*7, obs.y+5, 3, obs.height-10);
-                } else { // snake (avoid)
-                    ctx.fillStyle = "#306844";
-                    ctx.fillRect(obs.x, obs.y+10, obs.width, obs.height-10);
-                    ctx.fillStyle = "#d62828";
-                    ctx.fillRect(obs.x+5, obs.y+5, 6, 8);
-                }
+<!DOCTYPE html>
+<html dir="rtl" lang="ckb">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorani Runner - سۆرانی ڕانەر</title>
+    <style>
+        body { margin: 0; background: linear-gradient(to bottom, #4a90e2, #50c9c3); font-family: 'Tahoma', sans-serif; color: white; overflow: hidden; }
+        canvas { display: block; cursor: pointer; }
+        #ui { position: absolute; top: 10px; left: 10px; font-size: 24px; z-index: 10; }
+        #score { font-size: 32px; }
+        button { background: #ff6b6b; border: none; color: white; padding: 10px 20px; font-size: 18px; border-radius: 10px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <div id="ui">
+        <div>سەدەرەت: <span id="score">0</span></div>
+        <div id="question"></div>
+        <div id="options"></div>
+    </div>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+
+        const questions = [
+            {q: 'سڵاو چۆنیت؟', opts: ['سەرەتا', 'سڵاو', 'خوشەویستی', 'بەخێربێ'], ans: 1},
+            {q: 'ئەمە بە چەندە؟', opts: ['سەرەتا', 'سوپاس', 'چەندە', 'ببوورە'], ans: 2},
+            {q: 'بەیانی باش', opts: ['نیوەڕۆ', 'بەیانی باش', 'شەو', 'ڕۆژ'], ans: 1},
+            // زیاتر زیاد بکە لە ٢٠ بۆ بەردەوامبوون
+        ];
+
+        let player = {x: 50, y: 500, vy: 0, speed: 3};
+        let obstacles = [];
+        let score = 0;
+        let currentQ = 0;
+        let qActive = false;
+        let qAnswered = false;
+
+        function init() {
+            canvas.addEventListener('click', handleClick);
+            gameLoop();
+        }
+
+        function handleClick(e) {
+            if (!qActive) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const optW = 80;
+            const choice = Math.floor(x / optW);
+            if (choice === questions[currentQ].ans) {
+                score += 10;
+                player.speed += 0.5;
+                qAnswered = true;
             }
+            nextQuestion();
         }
-        
-        function drawCollectiblesEffect(){
-            // show flag floating for style
-            ctx.font = "bold 22px monospace";
-            ctx.fillStyle = "#FFD966";
-            ctx.shadowBlur = 0;
-            ctx.fillText("🇰🇿", 15, 45);
-            ctx.fillText("🏔️", canvas.width-45, 55);
-            ctx.font = "bold 14px monospace";
-            ctx.fillStyle = "#FFEC9F";
-            ctx.fillText("ZAGROS", canvas.width-85, 95);
+
+        function nextQuestion() {
+            currentQ = (currentQ + 1) % questions.length;
+            qActive = true;
+            showQuestion();
         }
-        
-        function drawUItext(){
-            if(!gameRunning){
-                ctx.font = "bold 36px monospace";
-                ctx.fillStyle = "#AA2E1E";
-                ctx.shadowBlur = 0;
-                ctx.fillText("GAME OVER", canvas.width/2-110, 170);
-                ctx.font = "18px monospace";
-                ctx.fillStyle = "#FFE484";
-                ctx.fillText("کلیک لەسەر دەستپێکەوە", canvas.width/2-120, 240);
-            }
+
+        function showQuestion() {
+            questionEl.textContent = questions[currentQ].q;
+            optionsEl.innerHTML = '';
+            questions[currentQ].opts.forEach((opt, i) => {
+                const btn = document.createElement('button');
+                btn.textContent = opt;
+                btn.onclick = () => { /* handle in click */ };
+                optionsEl.appendChild(btn);
+            });
         }
-        
-        function render(){
-            drawBackground();
-            drawObstacles();
-            drawPlayer();
-            drawCollectiblesEffect();
-            drawUItext();
-            // score on canvas
-            ctx.font = "bold 26px 'Segoe UI'";
-            ctx.fillStyle = "#2F1B0C";
-            ctx.shadowBlur = 0;
-            ctx.fillText("⚡"+Math.floor(score), canvas.width-100, 55);
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Background scroll
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Player
+            ctx.fillStyle = '#FFD700';
+            ctx.fillRect(player.x, player.y, 30, 50);
+            player.y += player.vy;
+            if (player.y > 450) player.y = 450, player.vy = 0;
+            player.vy += 0.5;
+            if (Math.random() < 0.02) obstacles.push({x: canvas.width, y: Math.random()*300 + 150});
+            // Obstacles
+            obstacles.forEach((obs, i) => {
+                obs.x -= player.speed;
+                ctx.fillStyle = '#8B0000';
+                ctx.fillRect(obs.x, obs.y, 30, 50);
+                if (obs.x < -30) obstacles.splice(i, 1);
+            });
+            scoreEl.textContent = score;
         }
-        
-        // game loop
-        function gameLoop(){
-            updateGame();
-            render();
+
+        function gameLoop() {
+            update();
             requestAnimationFrame(gameLoop);
         }
-        
-        // jump action
-        function jump(){
-            if(!gameRunning) return;
-            if(player.grounded){
-                player.ySpeed = player.jumpPower;
-                player.grounded = false;
-                // audio-like vibe via haptic? just visual feedback
-                document.getElementById('gameMessage').innerHTML = "🚀 باز! کۆکردنەوەی خاڵ 🚀";
-                setTimeout(()=>{
-                    if(gameRunning) document.getElementById('gameMessage').innerHTML = "🏃‍♂️ ڕابە بەرەو سەرکەوتن!";
-                },700);
-            }
-        }
-        
-        // event binding for touch & mouse
-        const jumpBtn = document.getElementById('jumpBtn');
-        const restartBtn = document.getElementById('restartBtn');
+
+        init();
+        nextQuestion();
+    </script>
+</body>
+    </html>tById('restartBtn');
         
         jumpBtn.addEventListener('click', (e) => {
             e.preventDefault();
