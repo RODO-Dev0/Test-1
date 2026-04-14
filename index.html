@@ -1,516 +1,831 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ckb" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Zagros Runner - Sorani Hero</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>🎲 بۆکسی نهێنی | Box Party</title>
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Nunito:wght@400;600;800;900&family=Vazirmatn:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
 
-        body {
-            background: linear-gradient(145deg, #0a3f1a 0%, #1a6d2c 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Courier New', 'Segoe UI', system-ui, monospace;
-            touch-action: manipulation;
-        }
+    :root {
+      --bg: #0a0a14;
+      --bg2: #151525;
+      --card: rgba(255, 255, 255, 0.06);
+      --card2: rgba(255, 255, 255, 0.1);
+      --border: rgba(255, 255, 255, 0.08);
+      --border2: rgba(255, 255, 255, 0.15);
+      --primary: #00f5d4;
+      --secondary: #ff006e;
+      --accent: #ffd60a;
+      --purple: #7c3aed;
+      --success: #00c853;
+      --error: #ff4444;
+      --text: #ffffff;
+      --text-dim: rgba(255, 255, 255, 0.5);
+      --text-mid: rgba(255, 255, 255, 0.75);
+      --fd: 'Russo One', sans-serif;
+      --fb: 'Vazirmatn', 'Nunito', sans-serif;
+      --radius: 20px;
+      --radius-sm: 14px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-top: env(safe-area-inset-top, 0px);
+    }
 
-        .game-container {
-            background: #2b1e0f;
-            border-radius: 48px;
-            padding: 12px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.5), inset 0 1px 4px rgba(255,255,255,0.2);
-        }
+    .theme-light {
+      --bg: #f0f4ff;
+      --bg2: #e0e8ff;
+      --card: rgba(255, 255, 255, 0.8);
+      --card2: rgba(255, 255, 255, 0.95);
+      --border: rgba(0, 0, 0, 0.1);
+      --border2: rgba(0, 0, 0, 0.2);
+      --primary: #6d28d9;
+      --secondary: #e11d48;
+      --accent: #d97706;
+      --text: #0f0f23;
+      --text-dim: rgba(15, 15, 35, 0.5);
+    }
 
-        canvas {
-            display: block;
-            margin: 0 auto;
-            border-radius: 28px;
-            box-shadow: 0 0 0 4px #f7c56e, 0 0 0 8px #d32f2f;
-            cursor: pointer;
-            background-color: #87CEEB;
-        }
+    .theme-purple {
+      --bg: #060010;
+      --bg2: #0d0020;
+      --card: rgba(124, 58, 237, 0.12);
+      --card2: rgba(124, 58, 237, 0.2);
+      --border: rgba(124, 58, 237, 0.2);
+      --border2: rgba(124, 58, 237, 0.35);
+      --primary: #c084fc;
+      --secondary: #f472b6;
+      --accent: #38bdf8;
+      --text: #f5f0ff;
+      --text-dim: rgba(245, 240, 255, 0.45);
+    }
 
-        .info-panel {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #221c12;
-            padding: 12px 20px;
-            margin-top: 16px;
-            border-radius: 60px;
-            color: #ffefb9;
-            text-shadow: 2px 2px 0 #6b2e00;
-            font-weight: bold;
-        }
+    body {
+      font-family: var(--fb);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      transition: background 0.3s, color 0.3s;
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      touch-action: pan-y;
+    }
 
-        .score-box, .high-box {
-            background: #000000aa;
-            backdrop-filter: blur(4px);
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-size: 1.5rem;
-            letter-spacing: 1px;
-        }
+    #app {
+      height: 100vh;
+      height: 100dvh;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .score-box span, .high-box span {
-            color: #ffd966;
-            font-size: 1.9rem;
-            margin-right: 6px;
-        }
+    /* Loading */
+    #loading {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s;
+    }
 
-        .controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 18px;
-        }
+    .loading-logo {
+      font-family: var(--fd);
+      font-size: clamp(36px, 12vw, 72px);
+      background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: pulse 1.8s infinite;
+    }
 
-        button {
-            background: #f4a261;
-            border: none;
-            font-size: 1.8rem;
-            font-weight: bold;
-            padding: 12px 24px;
-            border-radius: 60px;
-            color: #2c1a0c;
-            font-family: monospace;
-            box-shadow: 0 5px 0 #a3411b;
-            transition: 0.07s linear;
-            touch-action: manipulation;
-            cursor: pointer;
-        }
+    @keyframes pulse {
+      0%, 100% { filter: drop-shadow(0 0 20px var(--primary)); }
+      50% { filter: drop-shadow(0 0 50px var(--primary)); }
+    }
 
-        button:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #a3411b;
-        }
+    .load-bar {
+      width: 160px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin-top: 30px;
+      overflow: hidden;
+    }
 
-        .restart-btn {
-            background: #e76f51;
-            color: white;
-            padding: 8px 22px;
-            font-size: 1.3rem;
-        }
+    .load-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      animation: fillLoad 2.5s ease forwards;
+    }
 
-        @media (max-width: 550px) {
-            .score-box, .high-box { font-size: 1rem; padding: 4px 12px;}
-            .score-box span, .high-box span { font-size: 1.4rem;}
-            button { padding: 8px 16px; font-size: 1.3rem;}
-        }
+    @keyframes fillLoad {
+      0% { width: 0; }
+      100% { width: 100%; }
+    }
 
-        .message-area {
-            text-align: center;
-            margin-top: 12px;
-            background: #000000aa;
-            border-radius: 40px;
-            padding: 4px;
-            color: #ffdd99;
-            font-weight: bold;
-        }
-    </style>
+    /* Main Screens */
+    .screen {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: calc(12px + var(--safe-top)) 20px calc(20px + var(--safe-bottom));
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .screen.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .screen-inner {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    /* Header */
+    .game-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0 16px;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-family: var(--fd);
+      font-size: 22px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 44px;
+      background: var(--card2);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      backdrop-filter: blur(10px);
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+      background: var(--primary);
+      color: #000;
+    }
+
+    /* Buttons */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px 24px;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--fd);
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.15s;
+      width: 100%;
+      background: var(--card2);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      padding: 18px;
+      box-shadow: 0 8px 25px rgba(0, 245, 212, 0.25);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* Input Fields */
+    .input-wrapper {
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .input-label .required {
+      color: var(--error);
+      margin-left: 4px;
+    }
+
+    .game-input {
+      width: 100%;
+      padding: 16px 18px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: var(--fb);
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .game-input:focus {
+      border-color: var(--primary);
+    }
+
+    .game-input.error {
+      border-color: var(--error);
+      animation: shake 0.3s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    .game-input::placeholder {
+      color: var(--text-dim);
+      opacity: 0.6;
+    }
+
+    .char-counter {
+      position: absolute;
+      bottom: -18px;
+      right: 4px;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    /* Top Bar - Stats & Timer */
+    .top-stats {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+    }
+
+    .timer-badge {
+      background: var(--primary);
+      color: #000;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+    }
+
+    .progress-ring {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: conic-gradient(var(--primary) 0deg, var(--border) 0deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* Settings Bottom Sheet */
+    .settings-sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg2);
+      border-radius: 30px 30px 0 0;
+      padding: 24px 20px calc(24px + var(--safe-bottom));
+      z-index: 200;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1);
+      border-top: 1px solid var(--border);
+      max-width: 480px;
+      margin: 0 auto;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .settings-sheet.visible {
+      transform: translateY(0);
+    }
+
+    .settings-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border2);
+      border-radius: 4px;
+      margin: -12px auto 16px;
+    }
+
+    .settings-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 199;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .settings-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .lang-option.active {
+      border-color: var(--primary);
+      background: rgba(0, 245, 212, 0.1);
+    }
+
+    .lang-flag {
+      font-size: 28px;
+    }
+
+    /* Mystery Box */
+    .mystery-box {
+      width: 160px;
+      height: 160px;
+      margin: 20px auto;
+      background: linear-gradient(135deg, var(--accent), #ff9a00);
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 70px;
+      cursor: pointer;
+      box-shadow: 0 15px 40px rgba(255, 214, 10, 0.4);
+      transition: transform 0.2s;
+      animation: boxGlow 1.5s infinite alternate;
+    }
+
+    @keyframes boxGlow {
+      from { box-shadow: 0 10px 30px rgba(255, 214, 10, 0.3); }
+      to { box-shadow: 0 20px 50px rgba(255, 214, 10, 0.6); }
+    }
+
+    .mystery-box:active {
+      transform: scale(0.9);
+    }
+
+    .mystery-box.opening {
+      animation: boxOpen 0.5s forwards;
+    }
+
+    @keyframes boxOpen {
+      0% { transform: scale(1) rotate(0); }
+      30% { transform: scale(1.2) rotate(-8deg); }
+      100% { transform: scale(0) rotate(15deg); opacity: 0; }
+    }
+
+    /* Player Reveal */
+    .player-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 16px;
+      border: 3px solid var(--primary);
+      animation: popIn 0.4s;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.3); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Reveal Card */
+    .reveal-card {
+      background: linear-gradient(135deg, var(--primary), var(--purple));
+      border-radius: var(--radius);
+      padding: 30px 24px;
+      text-align: center;
+      margin: 20px 0;
+      animation: slideUp 0.4s;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .rc-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 16px;
+    }
+
+    .rc-text {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 16px;
+    }
+
+    /* Truth/Dare Buttons */
+    .td-row {
+      display: flex;
+      gap: 14px;
+      margin: 20px 0;
+    }
+
+    .td-btn {
+      flex: 1;
+      padding: 24px 12px;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--fd);
+      font-size: 22px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .td-btn.truth {
+      background: linear-gradient(135deg, var(--success), #1b5e20);
+      color: white;
+    }
+
+    .td-btn.dare {
+      background: linear-gradient(135deg, var(--secondary), #b71c1c);
+      color: white;
+    }
+
+    /* Leaderboard */
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--card);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+    }
+
+    .lb-rank {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      background: var(--primary);
+      color: #000;
+    }
+
+    .lb-name {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    .lb-score {
+      font-family: var(--fd);
+      font-size: 20px;
+      color: var(--accent);
+    }
+
+    /* Confetti */
+    .confetti {
+      position: fixed;
+      animation: confettiFall linear forwards;
+      z-index: 300;
+      pointer-events: none;
+      border-radius: 2px;
+    }
+
+    @keyframes confettiFall {
+      0% { top: -20px; opacity: 1; }
+      100% { top: 110vh; opacity: 0.2; }
+    }
+
+    /* Utility */
+    .text-center { text-align: center; }
+    .flex-1 { flex: 1; }
+    .hidden { display: none !important; }
+    .mb-2 { margin-bottom: 8px; }
+    .mb-4 { margin-bottom: 16px; }
+  </style>
 </head>
 <body>
-<div>
-    <div class="game-container">
-        <canvas id="gameCanvas" width="500" height="600"></canvas>
-        <div class="info-panel">
-            <div class="score-box"><span>🏆</span> <span id="scoreValue">0</span></div>
-            <div class="high-box"><span>⭐</span> BEST <span id="highScoreValue">0</span></div>
-        </div>
-        <div class="controls">
-            <button id="jumpBtn">⬆️ باز بکە / JUMP</button>
-            <button id="restartBtn" class="restart-btn">🔄 دەستپێکەوە</button>
-        </div>
-        <div class="message-area" id="gameMessage">
-            🔥 کلیک لەسەر باز بکە! خاڵ کۆبکەرەوە 🔥
-        </div>
+  <div id="app">
+    <!-- Loading -->
+    <div id="loading">
+      <div class="loading-logo">🎲 بۆکسی نهێنی</div>
+      <div id="loadText" style="margin-top: 16px; color: var(--text-dim);">ئامادەکاری دەکرێت...</div>
+      <div class="load-bar"><div class="load-fill"></div></div>
     </div>
-    <p style="text-align:center; margin-top:14px; color:#fff6d0; font-weight:bold; font-size:13px;">🇰🇿 Zagros Defender - بۆ گەلی کورد (سۆرانی) 🇰🇿</p>
-</div>
 
-<script>
-    (function(){
-        // ---------- CANVAS ----------
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        // game state
-        let gameRunning = true;
-        let score = 0;
-        let highScore = localStorage.getItem('zagrosHigh') ? parseInt(localStorage.getItem('zagrosHigh')) : 0;
-        document.getElementById('highScoreValue').innerText = highScore;
-
-        // player
-        const player = {
-            x: 70,
-            y: 440,
-            width: 45,
-            height: 50,
-            ySpeed: 0,
-            grounded: true,
-            jumpPower: -10,
-            gravity: 0.65
-        };
-
-        // obstacles
-        let obstacles = [];
-        let frameCounter = 0;
-        let spawnGap = 65;   // frames between obstacles
-        let baseSpeed = 5;
-        let currentSpeed = 5;
-
-        // visuals & theme (Kurdish colors)
-        let bgOffset = 0;
-
-        // ground Y
-        const groundY = 490;
-        
-        // helper functions
-        function updateHighScoreUI(){
-            document.getElementById('highScoreValue').innerText = highScore;
-        }
-
-        function updateScoreUI(){
-            document.getElementById('scoreValue').innerText = Math.floor(score);
-        }
-
-        function spawnObstacle(){
-            let obsType = Math.floor(Math.random() * 3);  // 0=rock, 1=log, 2=snake
-            let obsWidth = 30;
-            let obsHeight = 35;
-            if(obsType === 1) obsHeight = 28;
-            if(obsType === 2) obsHeight = 25;
-            obstacles.push({
-                x: canvas.width,
-                y: groundY - obsHeight + 5,
-                width: obsWidth,
-                height: obsHeight,
-                type: obsType
-            });
-        }
-
-        function resetGame(){
-            gameRunning = true;
-            score = 0;
-            currentSpeed = baseSpeed;
-            obstacles = [];
-            player.y = 440;
-            player.ySpeed = 0;
-            player.grounded = true;
-            frameCounter = 0;
-            updateScoreUI();
-            document.getElementById('gameMessage').innerHTML = "🎉 یاری دەست پێکرد! باز بکە بۆ خاڵ 🎉";
-            setTimeout(()=>{
-                if(gameRunning) document.getElementById('gameMessage').innerHTML = "⚡ کۆکردنەوەی ئاڵا و بازدان ⚡";
-            },1800);
-        }
-
-        function gameOver(){
-            if(!gameRunning) return;
-            gameRunning = false;
-            if(Math.floor(score) > highScore){
-                highScore = Math.floor(score);
-                localStorage.setItem('zagrosHigh', highScore);
-                updateHighScoreUI();
-                document.getElementById('gameMessage').innerHTML = "🏅 BEST NEW RECORD! 🏅 کلیک لە دەستپێکەوە بکە";
-            } else {
-                document.getElementById('gameMessage').innerHTML = "💔 کۆتایی هات! کلیک لە دەستپێکەوە بکە 💔";
-            }
-        }
-
-        // collision (AABB)
-        function collide(ax, ay, aw, ah, bx, by, bw, bh){
-            return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by;
-        }
-
-        function updateGame(){
-            if(!gameRunning) return;
-
-            // 1. player physics
-            player.ySpeed += player.gravity;
-            player.y += player.ySpeed;
-            if(player.y >= groundY - player.height){
-                player.y = groundY - player.height;
-                player.ySpeed = 0;
-                player.grounded = true;
-            } else {
-                player.grounded = false;
-            }
-
-            // 2. increase difficulty by speed & score
-            currentSpeed = baseSpeed + Math.floor(score / 350);
-            if(currentSpeed > 12) currentSpeed = 12;
-            
-            // 3. spawn obstacles
-            frameCounter++;
-            let dynamicSpawn = Math.max(40, spawnGap - Math.floor(score/500));
-            if(frameCounter >= dynamicSpawn){
-                frameCounter = 0;
-                spawnObstacle();
-            }
-
-            // 4. move obstacles & collision & score increment
-            for(let i=0; i<obstacles.length; i++){
-                const obs = obstacles[i];
-                obs.x -= currentSpeed;
-                
-                // collision detection
-                if(collide(player.x, player.y, player.width, player.height, obs.x, obs.y, obs.width, obs.height)){
-                    gameOver();
-                    return;
-                }
-                
-                // scoring: if obstacle passed player (x + width < player.x) and not counted
-                if(!obs.counted && obs.x + obs.width < player.x){
-                    obs.counted = true;
-                    // give points: 10 for each avoided obstacle + culture boost
-                    score += 10;
-                    updateScoreUI();
-                    // tiny speed sensation
-                }
-            }
-            
-            // remove offscreen obstacles
-            obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
-            
-            // 5. natural score increase per frame (endless runner feeling)
-            score += 0.2;
-            updateScoreUI();
-        }
-        
-        // ----------------- DRAW EVERYTHING KURDISH STYLE -----------------
-        function drawBackground(){
-            // sky gradient
-            const grad = ctx.createLinearGradient(0,0,0,300);
-            grad.addColorStop(0,"#f9d56e");
-            grad.addColorStop(1,"#f8c471");
-            ctx.fillStyle = grad;
-            ctx.fillRect(0,0,canvas.width, groundY-8);
-            
-            // mountains (Zagros vibe)
-            ctx.fillStyle = "#6b4423";
-            ctx.beginPath();
-            ctx.moveTo(0, groundY-60);
-            ctx.lineTo(80, groundY-130);
-            ctx.lineTo(170, groundY-70);
-            ctx.lineTo(260, groundY-150);
-            ctx.lineTo(350, groundY-85);
-            ctx.lineTo(450, groundY-140);
-            ctx.lineTo(canvas.width, groundY-60);
-            ctx.lineTo(canvas.width, groundY);
-            ctx.lineTo(0, groundY);
-            ctx.fill();
-            
-            ctx.fillStyle = "#8B5A2B";
-            ctx.beginPath();
-            ctx.moveTo(0, groundY-40);
-            ctx.lineTo(120, groundY-90);
-            ctx.lineTo(220, groundY-45);
-            ctx.lineTo(320, groundY-110);
-            ctx.lineTo(430, groundY-60);
-            ctx.lineTo(canvas.width, groundY-45);
-            ctx.lineTo(canvas.width, groundY);
-            ctx.lineTo(0, groundY);
-            ctx.fill();
-            
-            // ground with grass
-            ctx.fillStyle = "#4a7023";
-            ctx.fillRect(0, groundY, canvas.width, canvas.height-groundY);
-            ctx.fillStyle = "#85bb65";
-            for(let i=0;i<12;i++){
-                ctx.fillRect(i*55, groundY-8, 25, 10);
-            }
-            // sun
-            ctx.fillStyle = "#FFD966";
-            ctx.shadowBlur=0;
-            ctx.beginPath();
-            ctx.arc(430, 65, 35, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#F4A261";
-            ctx.beginPath();
-            ctx.arc(430, 65, 28, 0, Math.PI*2);
-            ctx.fill();
-        }
-        
-        function drawPlayer(){
-            // Kurdish fighter with Keffiyeh pattern
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = "#2b5e2b";
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            // head
-            ctx.fillStyle = "#f4cda5";
-            ctx.fillRect(player.x+8, player.y-12, 28, 18);
-            // keffiyeh
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(player.x+5, player.y-18, 34, 10);
-            ctx.fillStyle = "#c93a3a";
-            ctx.fillRect(player.x+10, player.y-15, 25, 6);
-            // eyes
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(player.x+12, player.y-8, 7, 6);
-            ctx.fillRect(player.x+26, player.y-8, 7, 6);
-            ctx.fillStyle = "#2c1e0f";
-            ctx.fillRect(player.x+14, player.y-7, 3, 4);
-            ctx.fillRect(player.x+28, player.y-7, 3, 4);
-            // kurdish flag on chest
-            ctx.fillStyle = "#ED1C24";
-            ctx.fillRect(player.x+15, player.y+12, 15, 8);
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(player.x+18, player.y+15, 9, 3);
-            ctx.fillStyle = "#00A651";
-            ctx.fillRect(player.x+15, player.y+17, 15, 3);
-        }
-        
-        function drawObstacles(){
-            for(let obs of obstacles){
-                if(obs.type === 0){ // rock
-                    ctx.fillStyle = "#5a4a3a";
-                    ctx.beginPath();
-                    ctx.ellipse(obs.x+15, obs.y+12, 14, 12, 0, 0, Math.PI*2);
-<!DOCTYPE html>
-<html dir="rtl" lang="ckb">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorani Runner - سۆرانی ڕانەر</title>
-    <style>
-        body { margin: 0; background: linear-gradient(to bottom, #4a90e2, #50c9c3); font-family: 'Tahoma', sans-serif; color: white; overflow: hidden; }
-        canvas { display: block; cursor: pointer; }
-        #ui { position: absolute; top: 10px; left: 10px; font-size: 24px; z-index: 10; }
-        #score { font-size: 32px; }
-        button { background: #ff6b6b; border: none; color: white; padding: 10px 20px; font-size: 18px; border-radius: 10px; margin: 5px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <canvas id="gameCanvas" width="400" height="600"></canvas>
-    <div id="ui">
-        <div>سەدەرەت: <span id="score">0</span></div>
-        <div id="question"></div>
-        <div id="options"></div>
+    <!-- Menu Screen -->
+    <div class="screen" id="menu">
+      <div class="screen-inner">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+          <div style="text-align:center; margin-bottom:40px;">
+            <div style="font-family:var(--fd); font-size:clamp(42px,12vw,72px); background:linear-gradient(135deg,var(--primary),var(--secondary),var(--accent)); -webkit-background-clip:text; background-clip:text; color:transparent;">🎲 بۆکس</div>
+            <div style="font-family:var(--fd); font-size:clamp(28px,8vw,48px); color:var(--text);" data-i18n="party">پارتی</div>
+          </div>
+          <button class="btn btn-primary" onclick="app.startGame()" data-i18n="start">▶ دەستپێکردن</button>
+          <button class="btn" onclick="app.openSettings()" style="margin-top:12px;" data-i18n="settings">⚙ ڕێکخستنەکان</button>
+        </div>
+        <div style="text-align:center; color:var(--text-dim); font-size:12px; padding:20px 0;">٢-١٠ یاریزان • v3.0</div>
+      </div>
     </div>
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreEl = document.getElementById('score');
-        const questionEl = document.getElementById('question');
-        const optionsEl = document.getElementById('options');
 
-        const questions = [
-            {q: 'سڵاو چۆنیت؟', opts: ['سەرەتا', 'سڵاو', 'خوشەویستی', 'بەخێربێ'], ans: 1},
-            {q: 'ئەمە بە چەندە؟', opts: ['سەرەتا', 'سوپاس', 'چەندە', 'ببوورە'], ans: 2},
-            {q: 'بەیانی باش', opts: ['نیوەڕۆ', 'بەیانی باش', 'شەو', 'ڕۆژ'], ans: 1},
-            // زیاتر زیاد بکە لە ٢٠ بۆ بەردەوامبوون
-        ];
+    <!-- Mode Select -->
+    <div class="screen" id="modeSelect">
+      <div class="screen-inner">
+        <div class="game-header">
+          <button class="icon-btn" onclick="app.goBack()">←</button>
+          <h1 data-i18n="gameMode">شێوازی یاری</h1>
+          <div style="width:44px;"></div>
+        </div>
+        <h2 style="font-family:var(--fd); margin-bottom:8px;" data-i18n="chooseMode">شێواز هەڵبژێرە</h2>
+        <p style="color:var(--text-dim); margin-bottom:20px;" data-i18n="chooseModeSub">چۆن دەتەوێ یاری بکەیت؟</p>
+        <div class="mode-cards" style="display:flex; flex-direction:column; gap:14px;">
+          <div class="mode-card" data-mode="mystery" onclick="app.selectMode('mystery')" style="display:flex; align-items:center; gap:16px; background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:20px; cursor:pointer;">
+            <span style="font-size:42px;">🎁</span>
+            <div>
+              <h3 style="font-family:var(--fd);" data-i18n="mysteryBox">بۆکسی نهێنی</h3>
+              <p style="color:var(--text-dim); font-size:13px;" data-i18n="mysteryDesc">پرسیاری نهێنی بنووسە. یاریزانێک بۆکسەکە دەکاتەوە — کەس نازانێ کێ نووسیویەتی!</p>
+            </div>
+          </div>
+          <div class="mode-card" data-mode="truthdare" onclick="app.selectMode('truthdare')" style="display:flex; align-items:center; gap:16px; background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:20px; cursor:pointer;">
+            <span style="font-size:42px;">🎭</span>
+            <div>
+              <h3 style="font-family:var(--fd);" data-i18n="truthDare">ڕاستی یان ئەرک 🔥</h3>
+              <p style="color:var(--text-dim); font-size:13px;" data-i18n="truthDareDesc">ڕاستی و ئەرکەکانت بنووسە. یاریزانان چارەنووسی خۆیان هەڵدەبژێرن!</p>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="modeNextBtn" onclick="app.goToCount()" disabled data-i18n="continue">بەردەوام بوون →</button>
+      </div>
+    </div>
 
-        let player = {x: 50, y: 500, vy: 0, speed: 3};
-        let obstacles = [];
-        let score = 0;
-        let currentQ = 0;
-        let qActive = false;
-        let qAnswered = false;
+    <!-- Player Count -->
+    <div class="screen" id="playerCount">
+      <div class="screen-inner">
+        <div class="game-header">
+          <button class="icon-btn" onclick="app.goBack()">←</button>
+          <h1 data-i18n="players">یاریزانان</h1>
+          <div style="width:44px;"></div>
+        </div>
+        <h2 style="font-family:var(--fd);" data-i18n="howMany">چەند یاریزان؟</h2>
+        <p style="color:var(--text-dim); margin-bottom:16px;" data-i18n="choose2to10">٢ بۆ ١٠ هەڵبژێرە</p>
+        <div class="count-grid" id="countGrid" style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:24px 0;"></div>
+        <button class="btn btn-primary" id="countNextBtn" onclick="app.goToNames()" disabled data-i18n="continue">بەردەوام بوون →</button>
+      </div>
+    </div>
 
-        function init() {
-            canvas.addEventListener('click', handleClick);
-            gameLoop();
-        }
+    <!-- Name Entry -->
+    <div class="screen" id="nameEntry">
+      <div class="screen-inner">
+        <div class="game-header">
+          <button class="icon-btn" onclick="app.goBack()">←</button>
+          <h1 data-i18n="names">ناوەکان</h1>
+          <div style="width:44px;"></div>
+        </div>
+        <div id="nameProgress" style="height:4px; background:var(--border); border-radius:4px; margin-bottom:24px;">
+          <div id="nameProgressFill" style="height:100%; width:0%; background:var(--primary); border-radius:4px; transition:width 0.3s;"></div>
+        </div>
+        <div id="nameEntryContent"></div>
+      </div>
+    </div>
 
-        function handleClick(e) {
-            if (!qActive) return;
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const optW = 80;
-            const choice = Math.floor(x / optW);
-            if (choice === questions[currentQ].ans) {
-                score += 10;
-                player.speed += 0.5;
-                qAnswered = true;
-            }
-            nextQuestion();
-        }
-
-        function nextQuestion() {
-            currentQ = (currentQ + 1) % questions.length;
-            qActive = true;
-            showQuestion();
-        }
-
-        function showQuestion() {
-            questionEl.textContent = questions[currentQ].q;
-            optionsEl.innerHTML = '';
-            questions[currentQ].opts.forEach((opt, i) => {
-                const btn = document.createElement('button');
-                btn.textContent = opt;
-                btn.onclick = () => { /* handle in click */ };
-                optionsEl.appendChild(btn);
-            });
-        }
-
-        function update() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // Background scroll
-            ctx.fillStyle = '#228B22';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            // Player
-            ctx.fillStyle = '#FFD700';
-            ctx.fillRect(player.x, player.y, 30, 50);
-            player.y += player.vy;
-            if (player.y > 450) player.y = 450, player.vy = 0;
-            player.vy += 0.5;
-            if (Math.random() < 0.02) obstacles.push({x: canvas.width, y: Math.random()*300 + 150});
-            // Obstacles
-            obstacles.forEach((obs, i) => {
-                obs.x -= player.speed;
-                ctx.fillStyle = '#8B0000';
-                ctx.fillRect(obs.x, obs.y, 30, 50);
-                if (obs.x < -30) obstacles.splice(i, 1);
-            });
-            scoreEl.textContent = score;
-        }
-
-        function gameLoop() {
-            update();
-            requestAnimationFrame(gameLoop);
-        }
-
-        init();
-        nextQuestion();
-    </script>
-</body>
-    </html>tById('restartBtn');
+    <!-- Content Creation -->
+    <div class="screen" id="contentCreation">
+      <div class="screen-inner">
+        <div class="game-header">
+          <button class="icon-btn" onclick="app.goBack()">←</button>
+          <h1 id="contentTitle">پرسیارەکان</h1>
+          <div style="width:44px;"></div>
+        </div>
         
-        jumpBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            jump();
-        });
-        restartBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            resetGame();
-        });
+        <!-- NEW: Top Stats Bar -->
+        <div class="top-stats">
+          <div class="stat-badge">
+            <span>👤</span>
+            <span id="playerProgress">1/10</span>
+          </div>
+          <div class="timer-badge" id="questionTimer">⏱️ 0:00</div>
+        </div>
         
-        // also tap on canvas for jump
-        canvas.addEventListener('click', (e) => {
-            e.preventDefault();
-            jump();
-        });
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            jump();
-        });
+        <div id="contentProgress" style="height:4px; background:var(--border); border-radius:4px; margin-bottom:16px;">
+          <div id="contentProgressFill" style="height:100%; width:0%; background:var(--primary); border-radius:4px; transition:width 0.3s;"></div>
+        </div>
+        <div id="contentArea"></div>
+      </div>
+    </div>
+
+    <!-- Cover Screen -->
+    <div class="screen" id="cover">
+      <div class="screen-inner">
+        <div class="cover-screen" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:100%;">
+          <div class="cover-emoji" id="coverEmoji" style="font-size:100px; animation:float 2s infinite;">🙈</div>
+          <h2 style="font-family:var(--fd); font-size:28px; margin-bottom:16px;" id="coverTitle">شاشە داخراوە</h2>
+          <p style="color:var(--text-dim); margin-bottom:32px;" id="coverText">مۆبایلەکە بدە بە یاریزانی داهاتوو</p>
+          <button class="btn btn-primary" onclick="app.nextFromCover()" id="coverBtn">کاتێک ئامادەیت →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="screen" id="game">
+      <div class="screen-inner">
+        <div class="game-header">
+          <button class="icon-btn" onclick="app.quitGame()">←</button>
+          <h1 id="gameTitle">یاری</h1>
+          <button class="icon-btn" onclick="app.openSettings()">⚙</button>
+        </div>
         
-        // initial high score
-        updateHighScoreUI();
-        resetGame();
-        gameLoop();
-    })();
-</script>
-</body>
-</html>
+        <!-- NEW: Game Top Bar with Timer & Round -->
+        <div class="top-stats">
+          <div class="stat-badge">
+            <span>🎯</span>
+            <span id="roundDisplay">خولی 1</span>
+          </div>
+          <div class="timer-badge" id="gameTimer">⏱️ 0:00</div>
+        </div>
+        
+        <div id="gameContent" style="flex:1; display:flex; flex-direction:column;"></div>
+      </div>
+    </div>
+
+    <!-- Game Over -->
+    <div class="screen" id="gameOver">
+      <div class="screen-inner">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; text-align:center;">
+          <div style="font-size:100px; animation:bounce 0.8s infinite alternate;">🎉</div>
+          <h2 style="font-family:var(--fd); font-size:36px; margin:20px 0;" data-i18n="gameOver">یاری تەواو بوو!</h2>
+          
+          <!-- NEW: Leaderboard in Game Over -->
+          <div id="leaderboard" style="margin: 20px 0;"></div>
+          
+          <button class="btn btn-primary" onclick="app.goToMenu()" data-i18n="playAgain">دووبارە یاری بکە</button>
+          <button class="btn" onclick="app.sameGroup()" style="margin-top:12px;" data-i18n="sameGroup">هەمان گروپ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Bottom Sheet -->
+    <div class="settings-overlay" id="settingsOverlay" onclick="app.closeSettings()"></div>
+    <div class="settings-sheet" id="settingsPanel">
+      <div class="settings-handle"></div>
+      
+      <h2 style="font-family:var(--fd); margin-bottom:20px;" data-i18n="settingsTitle">⚙ ڕێکخستنەکان</h2>
+      
+      <!-- Language Selection -->
+      <div class="input-wrapper">
+        <label class="input-label" data-i18n="language">🌐 زمان</label>
+        <div class="lang-option active" data-lang="ckb" onclick="app.setLanguage('ckb')">
+          <span class="lang-flag">🏳️</span>
+          <span>کوردی (سۆرانی)</span>
+          <span style="margin-right:auto; opacity:0.6;">پێشگریمانە</span>
+        </div>
+        <div class="lang-option" data-lang="ar" onclick="app.setLanguage('ar')">
+          <span class="lang-flag">🌙</span>
+          <span>العربية</span>
+        </div>
+        <div class="lang-option" data-lang="en" onclick="app.setLanguage('en')">
+          <span class="lang-flag">🇺🇸</span>
+          <span>English</span>
+        </div>
+      </div>
+      
+      <!-- Theme -->
+      <div class="input-wrapper">
+        <label class="input-label" data-i18n="theme">🎨 ڕووکار</label>
+        <div style="display:flex; gap:8px;">
+          <button class="opt-btn active" data-theme="dark" onclick="app.setTheme('dark')" style="flex:1; padding:12px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-sm); color:var(--text); cursor:pointer;">🌑 تاریک</button>
+          <button class="opt-btn" data-theme="light" onclick="app.setTheme('light')" style="flex:1; padding:12px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-sm); color:var(--text); cursor:pointer;">☀️ ڕووناک</button>
+          <button class="opt-btn" data-theme="purple" onclick="app.setTheme('purple')" style="flex:1; padding:12px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-sm); color:var(--text); cursor:pointer;">💜 کۆسمی</button>
+        </div>
+      </div>
+      
+      <!-- Sounds -->
+      <div class="input-wrapper">
+        <label class="input-label" data-i18n="sounds">🔊 دەنگ</label>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <span data-i18n="soundEffects">کاریگەری دەنگی</span>
+          <div id="soundToggle" class="toggle on" onclick="app.toggleSound()" style="width:52px; height:28px; background:var(--border); border-radius:14px; position:relative; cursor:pointer;"></div>
+        </div>
+      </div>
+      
+      <!-- NEW: Timer Setting -->
+      <div class="input-wrapper">
+        <label class="input-label" data-i18n="answerTimer">⏱️ کاتی وەڵامدانەوە</label>
+        <select id="timerSelect" onchange="app.setTimer(this.value)" style="width:100%; padding:14px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:var(--fb);">
+          <option value="0">بێ کات</option>
+          <option value="30">٣٠ چرکە</option>
+          <option value="60" selected>١ خولەک</option>
+          <option value="120">٢ خولەک</option>
+        </select>
+      </div>
+      
+      <!-- NEW: Vibration Toggle -->
+      <div class="input-wrapper">
+        <label class="input-label" data-i18n="vibration">📳 لەرزین</label>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <span data-i18n="hapticFeedback">لەرزینی هەستەوەر</span>
+          <div id="vibrationToggle" class="toggle on" onclick="app.toggleVibration()"></div>
+        </div>
+      </div>
+      
+      <!-- About -->
+      <div style="margin-top:24px; padding-top:20px; border-top:1px solid var(--border);">
+        <h3 style="margin-bottom:12px;" data-i18n="about">📖 دەربارە</h3>
+        <p style="color:var(--text-dim); font-size:14px; line-height:1.6;" data-i18n="aboutText">بۆکسی نهێنی یارییەکی پارتی سەرسوڕهێنەرە بۆ هاوڕێ و خێزان. پێبکەنە، ئەرک بکە، و نهێنیەکان ئاشکرا بکە!</p>
+        <p style="color:var(--text-dim); font-size:12px; margin-top:16px; opacity:0.6;">❤️ بۆ هەموو کۆبوونەوەیەک</p>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .toggle.on { background: var(--primary); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: left 0.3s,
